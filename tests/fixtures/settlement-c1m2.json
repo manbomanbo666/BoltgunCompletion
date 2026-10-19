@@ -1,0 +1,15 @@
+{
+  "level": "C1M2",
+  "event_time": "2026-10-19 23:15:51",
+  "runtime_revision": "ca3830f5472c6b82aa8560eeb295c8a342f076e202c6c9d4079f4da816172d89",
+  "generation": 5,
+  "killed": 170,
+  "spawned": 173,
+  "secretsFound": 6,
+  "secretsTotal": 6,
+  "widgetKillPercentage": 98.26589966,
+  "killsText": "98%",
+  "secretsText": "6/6",
+  "user_confirmed_display": true,
+  "original_runtime_confirmed": false
+}

@@ -1,0 +1,11 @@
+work/
+dist/
+__pycache__/
+*.pyc
+research/
+.vs/
+*.log
+*.dmp
+*.sav
+*.csv
+**/data/settings.json

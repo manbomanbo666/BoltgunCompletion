@@ -1,0 +1,1928 @@
+{
+  "C1M1": {
+    "chapterIndex": 0,
+    "levelIndex": 0,
+    "dlc": false,
+    "secretsTotal": 1,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 30831.673828125,
+          "y": 14488.875,
+          "z": 260.0000305175781
+        },
+        "guid": "c28c500e17189e4abad99e028324d1a2"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C1M2": {
+    "chapterIndex": 0,
+    "levelIndex": 1,
+    "dlc": false,
+    "secretsTotal": 6,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2",
+        "position": {
+          "x": -9505.5751953125,
+          "y": -46174.23828125,
+          "z": -1248.999755859375
+        },
+        "guid": "277fcf1f52c16f4287fecf2120ff7248"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": -31639.4296875,
+          "y": -28358.5,
+          "z": 2470.82568359375
+        },
+        "guid": "6038f027fa53a546b86d4e5824b0a360"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": -14000.931640625,
+          "y": -36185.44921875,
+          "z": -258.01116943359375
+        },
+        "guid": "45efcfb1734b6d4c976f07656e6af8c3"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": -14122.3046875,
+          "y": -35303.8125,
+          "z": -267.8885803222656
+        },
+        "guid": "9d91b9eecec1ef45a27c023a0147adf9"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": -9841.0,
+          "y": -32616.0,
+          "z": 681.0
+        },
+        "guid": "c5fe8323619fbe46aa5dddf146edcad8"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 9512.8037109375,
+          "y": -23771.15234375,
+          "z": 718.8870849609375
+        },
+        "guid": "f351535b19eb8b4f882b2c5e64bd632a"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C1M3": {
+    "chapterIndex": 0,
+    "levelIndex": 2,
+    "dlc": false,
+    "secretsTotal": 7,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_1",
+        "position": {
+          "x": -940.5133056640625,
+          "y": -10313.0,
+          "z": 481.0
+        },
+        "guid": "9b72542865d7ca4f80c4d5591d39d141"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 14655.94921875,
+          "y": -39913.109375,
+          "z": -12175.8994140625
+        },
+        "guid": "c9c2b8f5ae8a6344b1748cfdb9cd8bf0"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_3",
+        "position": {
+          "x": 13145.0,
+          "y": -1557.0,
+          "z": 2050.298583984375
+        },
+        "guid": "3d2b5da483a5524db4fb590f9747f464"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_4",
+        "position": {
+          "x": 13775.94921875,
+          "y": -28486.95703125,
+          "z": -7895.68310546875
+        },
+        "guid": "4ecbb83b0c6d6e48af18d676b74da433"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_5",
+        "position": {
+          "x": 14011.0,
+          "y": -35578.0,
+          "z": -11779.0
+        },
+        "guid": "a065a5837c899249996f7bc70709b8d7"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_6",
+        "position": {
+          "x": 23314.0,
+          "y": -10358.0,
+          "z": 585.0
+        },
+        "guid": "ca6214d69f24c34ab061ed71f22ba3db"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_7",
+        "position": {
+          "x": 14858.158203125,
+          "y": 5126.33349609375,
+          "z": 144.0001983642578
+        },
+        "guid": "918ebb474fce7145a51c1568fa050c45"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C1M4": {
+    "chapterIndex": 0,
+    "levelIndex": 3,
+    "dlc": false,
+    "secretsTotal": 6,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2_5",
+        "position": {
+          "x": 1360.0,
+          "y": 45240.0,
+          "z": -1453.7845458984375
+        },
+        "guid": "fcd6f4695430614d81011f9e55bbf1d8"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3_8",
+        "position": {
+          "x": -4720.0,
+          "y": 6000.0,
+          "z": -1855.99951171875
+        },
+        "guid": "1a62372b46bcba4e8d1575813be85992"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4_11",
+        "position": {
+          "x": -2040.0,
+          "y": 49560.0,
+          "z": -447.89990234375
+        },
+        "guid": "51c309f986c47e4eacb70590afda947e"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5_14",
+        "position": {
+          "x": -2423.703125,
+          "y": 17220.29296875,
+          "z": -1020.0819702148438
+        },
+        "guid": "6a81dcbfac97b64e89fbf084bd29d230"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": 1600.0,
+          "y": 18360.0,
+          "z": -1055.999755859375
+        },
+        "guid": "eecfc2ee4add80479011b838cd86ed79"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": -15852.51171875,
+          "y": 40983.07421875,
+          "z": -236.2538299560547
+        },
+        "guid": "68f8c0c59094c747ba9d354e564d918c"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C1M5": {
+    "chapterIndex": 0,
+    "levelIndex": 4,
+    "dlc": false,
+    "secretsTotal": 7,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2_2",
+        "position": {
+          "x": 50040.0,
+          "y": 1721.04638671875,
+          "z": -2976.0
+        },
+        "guid": "b5b8df76de115a4fbadbbacda7b3771f"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3_5",
+        "position": {
+          "x": 13475.22265625,
+          "y": 5560.0361328125,
+          "z": 224.0001983642578
+        },
+        "guid": "74701f95043db744a8c6d2739dc1990b"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4_8",
+        "position": {
+          "x": 14438.0,
+          "y": -315.0,
+          "z": 3744.0
+        },
+        "guid": "6b4b793d841a6949b0a8d98bca35e346"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5_11",
+        "position": {
+          "x": -6642.66015625,
+          "y": 2775.9609375,
+          "z": 258.8903503417969
+        },
+        "guid": "df0b2d7075d5fd43882492c2ecc406ec"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6_14",
+        "position": {
+          "x": 36320.0,
+          "y": 6625.0,
+          "z": 243.7437744140625
+        },
+        "guid": "1f45c613b6c1e847bb0ea18520ef743b"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume7",
+        "position": {
+          "x": 25880.0,
+          "y": 5280.0,
+          "z": 7584.0
+        },
+        "guid": "a0ad1666756e244893fc5881249d2265"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": -35602.36328125,
+          "y": -4430.017578125,
+          "z": 110.09169006347656
+        },
+        "guid": "f94e4628f71e054d8525274672f8d2da"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C1M6": {
+    "chapterIndex": 0,
+    "levelIndex": 5,
+    "dlc": false,
+    "secretsTotal": 7,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2_5",
+        "position": {
+          "x": 50208.0,
+          "y": -3700.0,
+          "z": 15707.1875
+        },
+        "guid": "6cb5432a77d90e44bdd880237ab0b8bd"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3_8",
+        "position": {
+          "x": 53449.0,
+          "y": 6080.0,
+          "z": 17998.0
+        },
+        "guid": "d47845cdbaff8a4fbe922d988124c21c"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4_11",
+        "position": {
+          "x": 66797.390625,
+          "y": 4751.63671875,
+          "z": 24178.294921875
+        },
+        "guid": "d3ac63965652cc4294bee9edd3c7bf10"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5_14",
+        "position": {
+          "x": 33660.09375,
+          "y": 3303.004638671875,
+          "z": 12158.9462890625
+        },
+        "guid": "a0d7166601822749bbb4d15dc981c79c"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": 36480.0,
+          "y": 12685.0,
+          "z": 15463.0458984375
+        },
+        "guid": "5873716dfa087246a2fbc276a1b868f3"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume7",
+        "position": {
+          "x": 61182.4375,
+          "y": -5335.82666015625,
+          "z": 16056.0
+        },
+        "guid": "9278766ab8d2cf4da18258670470ecbd"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 57292.96875,
+          "y": -878.9452514648438,
+          "z": 14952.25
+        },
+        "guid": "f158717d48cfa647ae04c40d1b118496"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C1M7": {
+    "chapterIndex": 0,
+    "levelIndex": 6,
+    "dlc": false,
+    "secretsTotal": 6,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2_5",
+        "position": {
+          "x": 13770.3642578125,
+          "y": -20077.595703125,
+          "z": 1033.7459716796875
+        },
+        "guid": "a0e254b8dcebfb429ac61245e8e98251"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3_8",
+        "position": {
+          "x": 21390.0,
+          "y": -10224.0,
+          "z": 1344.000244140625
+        },
+        "guid": "05914b6f6ed2994793c50160be6a94dd"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4_11",
+        "position": {
+          "x": 8623.4091796875,
+          "y": -17175.203125,
+          "z": -1801.202392578125
+        },
+        "guid": "366377506f083e4cb76717b5984d26df"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5_14",
+        "position": {
+          "x": 18311.134765625,
+          "y": 13859.984375,
+          "z": 3819.0
+        },
+        "guid": "5c7e57e10b5fde4db2259d938659a4d3"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": 11597.37109375,
+          "y": -10925.5048828125,
+          "z": 1452.42333984375
+        },
+        "guid": "e118d627fccdb9409552b80f665912e3"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 24800.0,
+          "y": -2945.0,
+          "z": -1356.2562255859375
+        },
+        "guid": "336df7a10683a74884a613224b135fd2"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C1M8": {
+    "chapterIndex": 0,
+    "levelIndex": 7,
+    "dlc": false,
+    "secretsTotal": 6,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2",
+        "position": {
+          "x": 62960.0,
+          "y": 103160.0,
+          "z": -1130.39599609375
+        },
+        "guid": "568b920c63a2ce46997b6e4edcf54847"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": 57240.0,
+          "y": 109855.0,
+          "z": -2457.751953125
+        },
+        "guid": "96e44df7a9d8934ca989debfa98b8286"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": 60994.25390625,
+          "y": -13978.29296875,
+          "z": 151.0001983642578
+        },
+        "guid": "00c37090d47ed64387498e7dc3466c4e"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": 97277.8359375,
+          "y": -781.1494140625,
+          "z": -6972.99609375
+        },
+        "guid": "53cc3e578487e748b8d5b69e51fd5802"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": 61655.0,
+          "y": 7225.0,
+          "z": 3371.366455078125
+        },
+        "guid": "b7a5b13f9d5c36438cd9e98e508e61a8"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 60368.0,
+          "y": 103477.0,
+          "z": -4391.00341796875
+        },
+        "guid": null
+      }
+    ],
+    "completeIndex": true
+  },
+  "C2M1": {
+    "chapterIndex": 1,
+    "levelIndex": 0,
+    "dlc": false,
+    "secretsTotal": 6,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2_2",
+        "position": {
+          "x": -4663.6728515625,
+          "y": 7576.84765625,
+          "z": 1585.85791015625
+        },
+        "guid": "9a8170e389899f4d9fdb26da6c01960d"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3_5",
+        "position": {
+          "x": -285.0,
+          "y": 32360.0,
+          "z": 1061.2080078125
+        },
+        "guid": "7d5cdc1c825a414d8bd6f89a228291a6"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4_8",
+        "position": {
+          "x": -19920.0,
+          "y": 35000.0,
+          "z": -2430.588134765625
+        },
+        "guid": "e9cd21b6db497c409e99cb514993e898"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5_11",
+        "position": {
+          "x": 10976.3271484375,
+          "y": 5405.67431640625,
+          "z": 109.49513244628906
+        },
+        "guid": "a2bd205c4b29f240979c1bf451ff1b5a"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6_14",
+        "position": {
+          "x": -24200.0,
+          "y": 32040.0,
+          "z": 1919.2642822265625
+        },
+        "guid": "3d867d8b51744846ba52fa46199fdbdc"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": -19376.974609375,
+          "y": -27607.263671875,
+          "z": 7087.25439453125
+        },
+        "guid": "2bbc2bb0e8ecc4469c948bcc1545a239"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C2M2": {
+    "chapterIndex": 1,
+    "levelIndex": 1,
+    "dlc": false,
+    "secretsTotal": 7,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_1",
+        "position": {
+          "x": 25179.0,
+          "y": -1768.0,
+          "z": -6351.0
+        },
+        "guid": null
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 35388.0,
+          "y": -12923.0,
+          "z": -3028.0
+        },
+        "guid": "ec8cbc28b349cd4498058c1a1f73db5f"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_3",
+        "position": {
+          "x": 25780.0,
+          "y": -22440.0,
+          "z": -3442.0
+        },
+        "guid": "e1cabc9854570446a31970e3320330c0"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_4",
+        "position": {
+          "x": -17489.0,
+          "y": -10650.0,
+          "z": -2332.0
+        },
+        "guid": "8f4f70ac46c3414b923cfce1e7aa2422"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_5",
+        "position": {
+          "x": 9986.0,
+          "y": -1160.0,
+          "z": -17007.798828125
+        },
+        "guid": "1124fd5bfa6c244883624a54c06fd8ee"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_6",
+        "position": {
+          "x": 13990.912109375,
+          "y": -24433.177734375,
+          "z": -3269.999267578125
+        },
+        "guid": "1b8462625ccbf842810fbc9f94acef15"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_7",
+        "position": {
+          "x": 13999.0,
+          "y": -22502.0,
+          "z": -4030.0
+        },
+        "guid": "d953e47d6bae3848820175b5d715c54a"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C2M3": {
+    "chapterIndex": 1,
+    "levelIndex": 2,
+    "dlc": false,
+    "secretsTotal": 6,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2_2",
+        "position": {
+          "x": 5280.0,
+          "y": 700.0,
+          "z": -55.236656188964844
+        },
+        "guid": "12f018bf216b57429f896519b644a94b"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3_5",
+        "position": {
+          "x": 13880.0,
+          "y": 11020.0,
+          "z": -545.3455810546875
+        },
+        "guid": "ff5caf922f79474dbf3f786599a49215"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4_8",
+        "position": {
+          "x": 33025.8984375,
+          "y": -3229.384033203125,
+          "z": -7156.4306640625
+        },
+        "guid": "10fb3e0d1410b94398692b1e6887a3c4"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5_11",
+        "position": {
+          "x": 21640.0,
+          "y": 10740.0,
+          "z": -6135.24365234375
+        },
+        "guid": "122b4d5eb244644a89b1b9543faa4c14"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6_14",
+        "position": {
+          "x": 25064.208984375,
+          "y": 4017.303466796875,
+          "z": -7146.26806640625
+        },
+        "guid": "4fcd7ce18c98a34c9763c22288c02fd3"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 42320.0,
+          "y": 16580.0,
+          "z": -6414.96240234375
+        },
+        "guid": "9dda5ca74161204ca314ed05ad1af4ce"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C2M4": {
+    "chapterIndex": 1,
+    "levelIndex": 3,
+    "dlc": false,
+    "secretsTotal": 5,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2",
+        "position": {
+          "x": -27010.0,
+          "y": 3100.0,
+          "z": -2745.0
+        },
+        "guid": "9430369c3be77f48b110bcfb45dd6172"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": -40409.67578125,
+          "y": 7936.96484375,
+          "z": -233.9644012451172
+        },
+        "guid": "0a0fc383af6b2445a7f58fffdf5939d2"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": -31823.3515625,
+          "y": 29463.376953125,
+          "z": -2832.62060546875
+        },
+        "guid": "69ef65ad504ea5459015f4dc99f783cc"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": -28314.0,
+          "y": 4971.0,
+          "z": -2876.0
+        },
+        "guid": "0f0fff87c8ef2c4e9c4ad873bccfdd8a"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": -21182.0,
+          "y": 10391.0,
+          "z": -1740.0
+        },
+        "guid": "f4ada909c88bdf4e968180b08686c69a"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C2M6": {
+    "chapterIndex": 1,
+    "levelIndex": 4,
+    "dlc": false,
+    "secretsTotal": 7,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2",
+        "position": {
+          "x": 26114.0,
+          "y": 9035.0,
+          "z": -1216.0008544921875
+        },
+        "guid": "9e4f217d24eec644ba919677f257e316"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": 20687.669921875,
+          "y": 16675.54296875,
+          "z": -570.0007934570312
+        },
+        "guid": "ade705cdf2d3f040baf8728c394a4e8c"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": 29221.521484375,
+          "y": 3685.40673828125,
+          "z": -564.29931640625
+        },
+        "guid": "0b00e4598a9643439c380a328a8497e7"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": 21760.3984375,
+          "y": 73558.5859375,
+          "z": 1009.6121826171875
+        },
+        "guid": "4200cebb80402448883c7b9fe541ace4"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": 13659.4970703125,
+          "y": 7564.6884765625,
+          "z": -513.61962890625
+        },
+        "guid": "57afe29cd9d816418f7c3e729b5ddd6c"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume7",
+        "position": {
+          "x": 29699.87109375,
+          "y": 30636.46484375,
+          "z": -1786.000732421875
+        },
+        "guid": "45ef1198ab9ce045b354a55c9ee65f23"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 14824.0,
+          "y": 30709.0,
+          "z": -1796.000732421875
+        },
+        "guid": "62f96d1f644e9b42b68f9052a76e4ab5"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C2M7": {
+    "chapterIndex": 1,
+    "levelIndex": 5,
+    "dlc": false,
+    "secretsTotal": 8,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_1",
+        "position": {
+          "x": 39189.8046875,
+          "y": 6575.0,
+          "z": 925.0
+        },
+        "guid": null
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 24251.119140625,
+          "y": -14056.6005859375,
+          "z": 355.0
+        },
+        "guid": "f5884c8d9edc7246b3f60e08d0879b4a"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_3",
+        "position": {
+          "x": -5485.0,
+          "y": -5400.0,
+          "z": -75.62227630615234
+        },
+        "guid": "8d04b92b8b046c4b8c203955c9db514f"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_4",
+        "position": {
+          "x": 18923.8203125,
+          "y": 6735.0,
+          "z": -855.0
+        },
+        "guid": "db4c3e68c92cd8418f59d0b9964e33ff"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_5",
+        "position": {
+          "x": 22505.869140625,
+          "y": 14221.0771484375,
+          "z": -936.61572265625
+        },
+        "guid": "9196f6a09c1cac41bfb19aeba33c1631"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_6",
+        "position": {
+          "x": 17140.0,
+          "y": -9940.0,
+          "z": 370.0
+        },
+        "guid": "b77be1b7e41fec429d8b31e30d6e63a6"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_7",
+        "position": {
+          "x": -2230.0,
+          "y": -9910.0,
+          "z": -25.0
+        },
+        "guid": "d44edc2b5d32174e92354fb38d83579e"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_8",
+        "position": {
+          "x": 20263.869140625,
+          "y": 14215.0771484375,
+          "z": -893.61572265625
+        },
+        "guid": "f88665796458d44d9f10b2051922bca2"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C2M8": {
+    "chapterIndex": 1,
+    "levelIndex": 6,
+    "dlc": false,
+    "secretsTotal": 6,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2",
+        "position": {
+          "x": 28163.7265625,
+          "y": 27244.150390625,
+          "z": 218.56517028808594
+        },
+        "guid": "5587334edf208a4dbab45a153146c963"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": 26131.30078125,
+          "y": 2594.738525390625,
+          "z": 1350.2352294921875
+        },
+        "guid": "5701914f2ffc5244956920763be0e68d"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": 31765.0,
+          "y": 33131.0,
+          "z": 253.00021362304688
+        },
+        "guid": "439070e2a6bd5c42b697d7bc9bf22fa6"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": 31913.818359375,
+          "y": 12435.6484375,
+          "z": 844.4072875976562
+        },
+        "guid": "234ff5eaecfe814589ecf4b2f6f93a05"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": 37752.85546875,
+          "y": 18096.71875,
+          "z": 1580.9686279296875
+        },
+        "guid": "bf706bde7751994ba88aa0ab7edcc552"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 36763.0,
+          "y": 3606.0,
+          "z": 955.43994140625
+        },
+        "guid": "5ee1cf67339c6649a9e1b45054e8c158"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C2M9": {
+    "chapterIndex": 1,
+    "levelIndex": 7,
+    "dlc": false,
+    "secretsTotal": 6,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_1",
+        "position": {
+          "x": -108335.71875,
+          "y": 12029.0849609375,
+          "z": -6270.00048828125
+        },
+        "guid": null
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": -12755.0,
+          "y": 13160.0,
+          "z": 24.320091247558594
+        },
+        "guid": "13b813dbd6f6df4699b8c46716b3023d"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_3",
+        "position": {
+          "x": -66690.0,
+          "y": -4650.0,
+          "z": -9085.0
+        },
+        "guid": "add92736f614e8429bf1ca09de83e280"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_4",
+        "position": {
+          "x": -2120.0,
+          "y": 11580.0,
+          "z": 1454.320068359375
+        },
+        "guid": "4e5d92b4d3487c4789ca101f7383c418"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_5",
+        "position": {
+          "x": -2098.386962890625,
+          "y": 8255.400390625,
+          "z": 1554.8756103515625
+        },
+        "guid": "b55a4b275f55e440a2e3059c73341a8e"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_6",
+        "position": {
+          "x": 5767.8212890625,
+          "y": 13120.2353515625,
+          "z": 57.077735900878906
+        },
+        "guid": "683830a1a26f764585f0e647d69d1a9e"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C3M1": {
+    "chapterIndex": 2,
+    "levelIndex": 0,
+    "dlc": false,
+    "secretsTotal": 7,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2",
+        "position": {
+          "x": -3400.0,
+          "y": 7720.0,
+          "z": 12904.0
+        },
+        "guid": "fbd585433e6f494e9752253ca9e22eca"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": -108.50982666015625,
+          "y": 5042.09375,
+          "z": 10318.74609375
+        },
+        "guid": "889e3b309003c2458c9c77fe6bf3f4f6"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": 5280.0,
+          "y": 6680.0,
+          "z": 19944.0
+        },
+        "guid": "d508eb8fe740254e8177f91ae23409ee"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": 400.001953125,
+          "y": -1910.009033203125,
+          "z": 2384.0
+        },
+        "guid": "1f7fe8cf9f9bf942a257fa00dedc33db"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": 2180.0,
+          "y": 6510.0,
+          "z": 18763.744140625
+        },
+        "guid": "f5bc989d1b8029438b1a3942e5eadada"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume7",
+        "position": {
+          "x": -218.03848266601562,
+          "y": 7450.27099609375,
+          "z": 17807.74609375
+        },
+        "guid": "a45c8c016802564ba703c33b08447e8f"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": -1234.998046875,
+          "y": 359.990966796875,
+          "z": 442.7439880371094
+        },
+        "guid": null
+      }
+    ],
+    "completeIndex": true
+  },
+  "C3M2": {
+    "chapterIndex": 2,
+    "levelIndex": 1,
+    "dlc": false,
+    "secretsTotal": 5,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2_5",
+        "position": {
+          "x": 31449.71875,
+          "y": -1438.637939453125,
+          "z": 1759.189697265625
+        },
+        "guid": "6f27215d4d64d94ba293549df808b83f"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3_8",
+        "position": {
+          "x": 13680.0,
+          "y": -7405.7705078125,
+          "z": 1634.000732421875
+        },
+        "guid": "123aec880e9f9f498a233cd1b4fc06b8"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4_11",
+        "position": {
+          "x": 17280.0,
+          "y": 4794.2294921875,
+          "z": 934.0001831054688
+        },
+        "guid": "b4ae71b95f50ad49a6d86c6e5f49b8c7"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5_14",
+        "position": {
+          "x": 28069.80078125,
+          "y": 3864.5830078125,
+          "z": 1844.0732421875
+        },
+        "guid": "fe886eabc2c1434b93e9a2ee67b8f356"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 44364.50390625,
+          "y": -652.3839111328125,
+          "z": 1195.7474365234375
+        },
+        "guid": "3127d3ddd04417418cbca2b965e5444f"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C3M3": {
+    "chapterIndex": 2,
+    "levelIndex": 2,
+    "dlc": false,
+    "secretsTotal": 6,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2",
+        "position": {
+          "x": 320.0,
+          "y": 3555.0,
+          "z": -575.99951171875
+        },
+        "guid": "f5622b1acd037042b12c93d82f727448"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": -5258.0,
+          "y": 2408.0,
+          "z": 704.000244140625
+        },
+        "guid": "ca79669168425e42963f4621de7ed65b"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": 10041.0205078125,
+          "y": 156.50775146484375,
+          "z": 464.18133544921875
+        },
+        "guid": "f154fb169e0fca49bd25ed48ed996ae6"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": -3873.0,
+          "y": 3779.0,
+          "z": 1344.000244140625
+        },
+        "guid": "07dd0b724d8fab41a009f4caff52899b"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": -12154.0,
+          "y": 4492.0,
+          "z": 856.0
+        },
+        "guid": "e58537e424447a4e870e7445aecb9302"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": -3508.087890625,
+          "y": -5034.5771484375,
+          "z": -1214.0
+        },
+        "guid": "f61b18bba274e44f8fa7eedcb6e36f22"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C2M5": {
+    "chapterIndex": 2,
+    "levelIndex": 3,
+    "dlc": false,
+    "secretsTotal": 6,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2_5",
+        "position": {
+          "x": 3560.0,
+          "y": 27960.0,
+          "z": 3384.320068359375
+        },
+        "guid": "16897659e833704685f2a6c9a66b9e34"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3_8",
+        "position": {
+          "x": 10829.728515625,
+          "y": 4275.2216796875,
+          "z": 8050.81982421875
+        },
+        "guid": "72a141def74a694799744f1e59b0815d"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4_11",
+        "position": {
+          "x": 9240.0,
+          "y": 7760.0,
+          "z": 3704.320068359375
+        },
+        "guid": "f666640a72f9854e91b08933e2160eb0"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5_14",
+        "position": {
+          "x": 2000.0,
+          "y": 3600.0,
+          "z": 3704.320068359375
+        },
+        "guid": "cd6e764975c9244a9d464ba4ad145bf1"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6_17",
+        "position": {
+          "x": -1441.0,
+          "y": 2800.0,
+          "z": 2363.74365234375
+        },
+        "guid": "67a34e126d139b47a5655561cde2d10c"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 25319.91015625,
+          "y": 6519.5615234375,
+          "z": 7263.74365234375
+        },
+        "guid": "2f4402b8cbcd674a80e00fd52bbbb5f9"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C3M4": {
+    "chapterIndex": 2,
+    "levelIndex": 4,
+    "dlc": false,
+    "secretsTotal": 5,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2_5",
+        "position": {
+          "x": 3763.999755859375,
+          "y": 6467.0009765625,
+          "z": 135.20755004882812
+        },
+        "guid": "f39be996bdad8449a9a8095d665b1553"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3_8",
+        "position": {
+          "x": 23976.72265625,
+          "y": -6802.9267578125,
+          "z": 3574.206787109375
+        },
+        "guid": "14fe2756d3d233459a468a15484c0fd9"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4_11",
+        "position": {
+          "x": 2920.0,
+          "y": 680.0,
+          "z": 1144.0003662109375
+        },
+        "guid": "282b61e183fce444b323cf5b7b2caf58"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5_14",
+        "position": {
+          "x": 25489.623046875,
+          "y": -5588.59619140625,
+          "z": 2854.20751953125
+        },
+        "guid": "5296c27cc659164cb34bbbfd7acbda9d"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 13090.0,
+          "y": 11342.0,
+          "z": 941.2075805664062
+        },
+        "guid": "65c3fb73777e364899f28c476d6a8cda"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C3M7": {
+    "chapterIndex": 2,
+    "levelIndex": 5,
+    "dlc": false,
+    "secretsTotal": 6,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_1",
+        "position": {
+          "x": -9805.0,
+          "y": -3115.0,
+          "z": 3250.0
+        },
+        "guid": "dbf640e34c5f4140bd8e788723da5b02"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 11657.18359375,
+          "y": -5133.14013671875,
+          "z": -490.00018310546875
+        },
+        "guid": "a67b418bc697604aa276fe311b182ea3"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_3",
+        "position": {
+          "x": -9790.0,
+          "y": -5150.0,
+          "z": 3260.0
+        },
+        "guid": "b1dd5fa678583c4c88575f33b80e8d8c"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_4",
+        "position": {
+          "x": 21508.0,
+          "y": 7599.0,
+          "z": -435.0
+        },
+        "guid": "8d581774a9af114384ee93fcc32cf702"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_5",
+        "position": {
+          "x": -2105.906494140625,
+          "y": -92.48431396484375,
+          "z": -561.5524291992188
+        },
+        "guid": "b54f5f4efd0cf4428fc466d88180e35f"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_6",
+        "position": {
+          "x": 4237.90283203125,
+          "y": 651.0240478515625,
+          "z": -559.9794921875
+        },
+        "guid": "f87742d20f01c24ebe407b657de44c8d"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C3M8": {
+    "chapterIndex": 2,
+    "levelIndex": 6,
+    "dlc": false,
+    "secretsTotal": 5,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2",
+        "position": {
+          "x": 3375.0,
+          "y": 3785.0,
+          "z": 20695.0
+        },
+        "guid": "0b5185853167b0448e856bbe1732c2ee"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": 10260.0,
+          "y": 3835.0,
+          "z": 18655.0
+        },
+        "guid": "2065c4202a7a4543ba8ef2d0d95157bd"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": -5269.10400390625,
+          "y": -57.15351486206055,
+          "z": 6234.6279296875
+        },
+        "guid": "81847d75cd6f1d4c9162634d1e1e81ca"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": 8399.1982421875,
+          "y": -1953.6572265625,
+          "z": 694.000244140625
+        },
+        "guid": "a07363aa3d69b841abb2653d338c2fbc"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 1840.0,
+          "y": 3840.0,
+          "z": 11315.0
+        },
+        "guid": null
+      }
+    ],
+    "completeIndex": true
+  },
+  "C3M9": {
+    "chapterIndex": 2,
+    "levelIndex": 7,
+    "dlc": false,
+    "secretsTotal": 10,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume10",
+        "position": {
+          "x": 8146.7783203125,
+          "y": 907.4275512695312,
+          "z": 16628.74609375
+        },
+        "guid": "8cdc8bed9e425844af5e323ed461c2de"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2_5",
+        "position": {
+          "x": 2884.02099609375,
+          "y": 6042.841796875,
+          "z": 13480.7861328125
+        },
+        "guid": "e133bde9e8c0a74aabb9f8953f2f5079"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3_8",
+        "position": {
+          "x": 4676.2744140625,
+          "y": 14498.705078125,
+          "z": 16390.34375
+        },
+        "guid": "2191339cb27d7a4596dc2740f5ad5f6a"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4_11",
+        "position": {
+          "x": 10419.41015625,
+          "y": 4379.41015625,
+          "z": 15462.9140625
+        },
+        "guid": "c0217059dc74ef4fa793a3950eaef9b3"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": 3141.37939453125,
+          "y": 11366.6328125,
+          "z": 15447.8759765625
+        },
+        "guid": "bd9000c96be5af459cd1300e62a878c0"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6_17",
+        "position": {
+          "x": 2159.799560546875,
+          "y": 3616.7685546875,
+          "z": 16645.396484375
+        },
+        "guid": "90e3c96411cf91429bd71de5214f6cd2"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume7_20",
+        "position": {
+          "x": 3359.0,
+          "y": 9400.0,
+          "z": 10163.744140625
+        },
+        "guid": "627d4753e6f1624bbd47596f32ba1110"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume8",
+        "position": {
+          "x": 10128.36328125,
+          "y": 1638.35302734375,
+          "z": 15047.228515625
+        },
+        "guid": "13925fbdfe6a2d48b6df00f1135297ec"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume9",
+        "position": {
+          "x": 6670.0,
+          "y": -560.0,
+          "z": 16609.0
+        },
+        "guid": "7fd52a352330db44817ef27f45207356"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 8367.0,
+          "y": 14520.0,
+          "z": 15050.34375
+        },
+        "guid": "f75b6c2007377145bfd4af8e7dd47a19"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C4M1": {
+    "chapterIndex": 3,
+    "levelIndex": 0,
+    "dlc": true,
+    "secretsTotal": 8,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2",
+        "position": {
+          "x": 53625.51953125,
+          "y": 51800.0,
+          "z": 4259.97216796875
+        },
+        "guid": "04659462c93d8d4ca3db7c9d0618ecab"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": 27705.0,
+          "y": 35915.0,
+          "z": 6231.25390625
+        },
+        "guid": "e0d443859db56849ba7961fe4b16bebb"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": 78043.2734375,
+          "y": 59982.09765625,
+          "z": 8278.7451171875
+        },
+        "guid": "dbb56a477816264eb54491d2da9d20c2"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": 78600.0078125,
+          "y": 92920.0,
+          "z": 8277.7451171875
+        },
+        "guid": "aae78fa17b225247bb5965b4f0ebf4c3"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": 143260.0,
+          "y": 93805.0,
+          "z": 16904.318359375
+        },
+        "guid": "8ce9c36462b32946bf9028c21b031557"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume7",
+        "position": {
+          "x": 4406.7109375,
+          "y": -39798.38671875,
+          "z": 2657.98291015625
+        },
+        "guid": "2103ad2ce5655b42b8536b38521a264f"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume8",
+        "position": {
+          "x": 102830.7734375,
+          "y": 82023.3203125,
+          "z": 8271.5126953125
+        },
+        "guid": "5805cba59912e54fb0296e75df4ffb80"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 42465.51953125,
+          "y": 58680.0,
+          "z": 4259.97216796875
+        },
+        "guid": "ad7a536a6e2f974190146f76dead50e6"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C4M2": {
+    "chapterIndex": 3,
+    "levelIndex": 1,
+    "dlc": true,
+    "secretsTotal": 5,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2",
+        "position": {
+          "x": 13475.6201171875,
+          "y": 2192.41455078125,
+          "z": -4860.08642578125
+        },
+        "guid": "4f5792c53307cc4198c392211465c033"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": 30155.0,
+          "y": 8300.0,
+          "z": -9655.80078125
+        },
+        "guid": "ecb6d7c2d8fbc1478f0f121637c363aa"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": 60986.82421875,
+          "y": -21403.703125,
+          "z": 4539.76904296875
+        },
+        "guid": "c8a75b5705eb5445ac1def030cf626fb"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": 49280.0,
+          "y": -24400.00390625,
+          "z": 3224.183837890625
+        },
+        "guid": "5cffb2b29d7c6349bff7850b432797d2"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 49300.0,
+          "y": -27240.0,
+          "z": 1920.45947265625
+        },
+        "guid": "e1867e9a5278ba4fa7d7e64b17907808"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C4M3": {
+    "chapterIndex": 3,
+    "levelIndex": 2,
+    "dlc": true,
+    "secretsTotal": 7,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2",
+        "position": {
+          "x": 77135.0,
+          "y": 39130.0,
+          "z": -1540.5810546875
+        },
+        "guid": "e85f8ca3b4d7554a882fd8345bf99360"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": 86200.0,
+          "y": 43960.0,
+          "z": -2376.00146484375
+        },
+        "guid": "c6bde0069149c940a49860794bd3cd82"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": 152735.125,
+          "y": 79889.6171875,
+          "z": -2203.4169921875
+        },
+        "guid": "0f886c8650f03948b61c787dbe0a9d28"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": 55605.0,
+          "y": 27605.0,
+          "z": 523.7437744140625
+        },
+        "guid": "66b4a93d5eb7404598955e5c1d6aa023"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": 75200.0,
+          "y": 37400.0,
+          "z": 11.048538208007812
+        },
+        "guid": "e12ac71fc240d84380e55007faa59fbd"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume7",
+        "position": {
+          "x": 72290.640625,
+          "y": 31352.357421875,
+          "z": -1439.7998046875
+        },
+        "guid": "092333df9f2b734e862c3a26508cec99"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 207585.953125,
+          "y": 71959.8984375,
+          "z": 579.4189453125
+        },
+        "guid": "a333445e30dbfa45a11d4a65bb105abd"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C4M4": {
+    "chapterIndex": 3,
+    "levelIndex": 3,
+    "dlc": true,
+    "secretsTotal": 7,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2",
+        "position": {
+          "x": 50385.0,
+          "y": -2300.0,
+          "z": 83.74375915527344
+        },
+        "guid": "b68a4e99eaf5ec4eb7f7e4718442651f"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": 48015.0,
+          "y": -7460.0,
+          "z": 2647.74365234375
+        },
+        "guid": "8de25fbe5e52c447ac54bda6b19b0320"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": 74641.0,
+          "y": -26840.0,
+          "z": 143.34051513671875
+        },
+        "guid": "6ccd0f893649ca45bf74e572cdd629a2"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": 103179.0,
+          "y": -13826.0,
+          "z": 64.09661102294922
+        },
+        "guid": "6af98f659ff2e24b9657ded444a43019"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": 104435.0,
+          "y": 945.0,
+          "z": -9916.255859375
+        },
+        "guid": "268052e578952342a541366f0a16c9c1"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume7",
+        "position": {
+          "x": 125385.0,
+          "y": 4075.0,
+          "z": -20906.255859375
+        },
+        "guid": "76b907efc2b8b549ab5630d8507cc659"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume_2",
+        "position": {
+          "x": 32511.0,
+          "y": 17892.0,
+          "z": 869.1813354492188
+        },
+        "guid": "cbb2d83f65126b4aa7b2fa67f858ace1"
+      }
+    ],
+    "completeIndex": true
+  },
+  "C4M5": {
+    "chapterIndex": 3,
+    "levelIndex": 4,
+    "dlc": true,
+    "secretsTotal": 11,
+    "secrets": [
+      {
+        "name": "BP_Activatable_SecretUnlockVolume1",
+        "position": {
+          "x": 10831.59375,
+          "y": 3497.938232421875,
+          "z": -766.2545776367188
+        },
+        "guid": "66688efa75e45a4f9f236b7be6128040"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume10",
+        "position": {
+          "x": 2080.0,
+          "y": 5360.0,
+          "z": -775.6798095703125
+        },
+        "guid": "2fa009ce0afa3d4d8337c96f03e98140"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume11",
+        "position": {
+          "x": 12288.3115234375,
+          "y": 14808.3115234375,
+          "z": 410.8574523925781
+        },
+        "guid": "f65a5cbc6f388c4dad8d0ae0de1d2992"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume2_0",
+        "position": {
+          "x": 5045.26123046875,
+          "y": 12444.7333984375,
+          "z": 440.0
+        },
+        "guid": "9ff3f1c8faee9f4c93fd08fdfd52f0f4"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume3",
+        "position": {
+          "x": 18470.0,
+          "y": 8540.0,
+          "z": -774.638427734375
+        },
+        "guid": "03ee9f76e77ecc46b1d7302de9b97efe"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume4",
+        "position": {
+          "x": 4754.78857421875,
+          "y": 17107.150390625,
+          "z": -739.0861206054688
+        },
+        "guid": "3c51a38d5018a24cba5dd516ae6cb18d"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume5",
+        "position": {
+          "x": 10220.76171875,
+          "y": 27167.431640625,
+          "z": -487.4179382324219
+        },
+        "guid": "2a7fbe73ac62b0478f0dd48c22012d63"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume6",
+        "position": {
+          "x": 12667.947265625,
+          "y": 18012.646484375,
+          "z": -743.097900390625
+        },
+        "guid": "bbbd94013319164f916040369f4005cb"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume7",
+        "position": {
+          "x": 13497.6328125,
+          "y": 1082.5177001953125,
+          "z": 632.0
+        },
+        "guid": "fac77efca39d53449e2385f7e1c7b801"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume8",
+        "position": {
+          "x": -616.0,
+          "y": 8075.0,
+          "z": 195.74375915527344
+        },
+        "guid": "356ca16bee2362419914ff3b87956abc"
+      },
+      {
+        "name": "BP_Activatable_SecretUnlockVolume9",
+        "position": {
+          "x": 17920.0,
+          "y": 5360.0,
+          "z": -775.6798095703125
+        },
+        "guid": "2c68cfe4623e6c4f82d2823e745fce22"
+      }
+    ],
+    "completeIndex": true
+  }
+}
