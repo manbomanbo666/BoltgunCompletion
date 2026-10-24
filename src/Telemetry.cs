@@ -91,6 +91,14 @@ public sealed class LogTail {
 }
 public static class DisplayText {
     public static string Count(int? n) { return n.HasValue?n.Value.ToString(CultureInfo.InvariantCulture):"待核实"; }
+    public static string CompactProgress(GameSnapshot s) {
+        if(s.mode=="results"&&s.finalResult!=null&&s.finalResult.confirmed) {
+            string result=s.Perfect?"最终结算：完美通关":"最终结算击杀率 "+(s.finalResult.killPercent.HasValue?s.finalResult.killPercent.Value.ToString("0.##",CultureInfo.InvariantCulture)+"%":"待核实");
+            return result+" · 秘密 "+Count(s.finalResult.secretsFound)+" / "+Count(s.finalResult.secretsTotal)+(s.verified?"":" · 判定待核实");
+        }
+        return "本次击杀 "+Count(s.killed)+" · 秘密 "+Count(s.secretsFound)+" / "+Count(s.secretsTotal)+" · 参考击杀 "+
+            (s.killPercent.HasValue?s.killPercent.Value.ToString("0.##",CultureInfo.InvariantCulture)+"%":"待核实")+" · 以最终结算为准";
+    }
     public static string Progress(GameSnapshot s) {
         string percent=s.killPercent.HasValue?s.killPercent.Value.ToString("0.##",CultureInfo.InvariantCulture)+"%":"待核实";
         string result="当前击杀进度  "+percent+"（参考）  已击杀 "+Count(s.killed)+"\r\n秘密    "+Count(s.secretsFound)+" / "+Count(s.secretsTotal);

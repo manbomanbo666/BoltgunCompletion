@@ -133,6 +133,7 @@ public static class Program {
     [STAThread] public static int Main(string[] args) {
         try {
             if(args.Contains("--render-preview"))return SelfTests.Render(args.Last());
+            if(args.Contains("--render-radar-previews"))return SelfTests.RenderRadars(args.Last());
             string game=GameLocator.Find();
             if(args.Contains("--check")) { Console.WriteLine(game??"NOT_FOUND"); if(game!=null) { GameLocator.Validate(game); Console.WriteLine("SUPPORTED"); } return game==null?1:0; }
             if(args.Contains("--connect")) {

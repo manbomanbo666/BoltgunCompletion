@@ -6,7 +6,7 @@ import json
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '0.1.0.1'
+VERSION = '0.2.0.2'
 
 
 def write_archive(output, base, files):
