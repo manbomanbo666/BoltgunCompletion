@@ -26,6 +26,11 @@ public sealed class Settings {
 }
 public sealed class OverlayForm:Form {
     bool edit,campaign,changingHandle,presenting;
+    bool dirty=true,backgroundDirty=true,currentActive;
+    GameSnapshot currentSnapshot;
+    Point3 animatedPlayer;double? animatedYaw;
+    readonly LayeredWindow surface=new LayeredWindow();
+    Bitmap frame,backdrop;Graphics frameCanvas,backdropCanvas;
     readonly RadarControl radar=new RadarControl();
     readonly TargetTracker targets=new TargetTracker();
     readonly Settings settings;
@@ -36,6 +41,10 @@ public sealed class OverlayForm:Form {
     internal string EnemyCountText {get{return enemyCount;}}
     internal RadarControl Radar {get{return radar;}}
     internal int PresentationCount {get;private set;}
+    internal int BufferAllocations {get;private set;}
+    internal int BackgroundBuildCount {get;private set;}
+    internal int NativeSurfaceAllocations {get{return surface.Allocations;}}
+    internal Bitmap CachedFrame(){return frame==null?null:(Bitmap)frame.Clone();}
     public string PresentationError {get;private set;}
     [DllImport("user32.dll")] static extern bool ReleaseCapture();
     [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr hwnd,uint msg,IntPtr w,IntPtr l);
@@ -56,14 +65,15 @@ public sealed class OverlayForm:Form {
         bool next=value&&!settings.PinCenter;if(next==edit){Present();return;}
         edit=next;var bounds=Bounds;changingHandle=true;
         try{RecreateHandle();Bounds=bounds;}finally{changingHandle=false;}
-        UpdateRadarSize();Present();
+        UpdateRadarSize();dirty=true;Present();
     }
     public static int ValidRange(int value){return new[]{50,100,250,500}.Contains(value)?value:100;}
-    public void SetRadarRange(int value){radarRange=ValidRange(value);}
-    public void ApplyAppearance(){settings.Normalize();Present();}
+    public void SetRadarRange(int value){radarRange=ValidRange(value);radar.SetRange(radarRange);dirty=true;Present();}
+    public void ApplyAppearance(){settings.Normalize();backgroundDirty=true;dirty=true;Present();}
     public void SetPinned(bool value) {
         if(value&&!settings.PinCenter){settings.OverlayX=Left;settings.OverlayY=Top;}
         settings.PinCenter=value;
+        dirty=true;
         if(value){SetEdit(false);UpdateAnchor(anchorWindow);}else Location=new Point(settings.OverlayX,settings.OverlayY);
         Present();
     }
@@ -85,31 +95,62 @@ public sealed class OverlayForm:Form {
         }
         return bitmap;
     }
+    void DisposeBuffers(){if(frameCanvas!=null)frameCanvas.Dispose();if(backdropCanvas!=null)backdropCanvas.Dispose();if(frame!=null)frame.Dispose();if(backdrop!=null)backdrop.Dispose();frameCanvas=backdropCanvas=null;frame=backdrop=null;}
+    void DrawFrame() {
+        UpdateRadarSize();
+        if(frame==null||frame.Size!=ClientSize){DisposeBuffers();frame=new Bitmap(ClientSize.Width,ClientSize.Height,System.Drawing.Imaging.PixelFormat.Format32bppPArgb);backdrop=new Bitmap(ClientSize.Width,ClientSize.Height,System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            frameCanvas=Graphics.FromImage(frame);backdropCanvas=Graphics.FromImage(backdrop);BufferAllocations++;backgroundDirty=true;}
+        if(backgroundDirty){
+            backdropCanvas.Clear(Color.Transparent);
+            using(var brush=new SolidBrush(RadarAppearance.Fade(BackColor,settings.Appearance.Background)))backdropCanvas.FillRectangle(brush,ClientRectangle);
+            backdropCanvas.TextRenderingHint=System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+            using(var brush=new SolidBrush(RadarAppearance.Fade(campaign?ForeColor:Color.FromArgb(232,189,89),settings.Appearance.Counter)))
+            using(var format=new StringFormat {Alignment=StringAlignment.Center,LineAlignment=StringAlignment.Center})backdropCanvas.DrawString(enemyCount,Font,brush,new Rectangle(8,8,Math.Max(1,ClientSize.Width-16),28),format);
+            radar.DrawBackdrop(backdropCanvas,RadarBounds,settings.Appearance);backgroundDirty=false;BackgroundBuildCount++;
+        }
+        frameCanvas.CompositingMode=System.Drawing.Drawing2D.CompositingMode.SourceCopy;frameCanvas.DrawImageUnscaled(backdrop,0,0);
+        frameCanvas.CompositingMode=System.Drawing.Drawing2D.CompositingMode.SourceOver;
+        radar.DrawTargets(frameCanvas,RadarBounds,settings.Appearance,settings.ShowPlayerArrow&&!settings.PinCenter,settings.HeightTolerance);
+        frameCanvas.Flush(System.Drawing.Drawing2D.FlushIntention.Sync);
+    }
+    public void Animate(PlayerPose pose) {
+        if(campaign&&currentSnapshot!=null){
+            var player=pose!=null?pose.player:currentSnapshot.player;var yaw=pose!=null?pose.yaw:currentSnapshot.yaw;
+            if(player!=null&&(animatedPlayer==null||player.x!=animatedPlayer.x||player.y!=animatedPlayer.y||player.z!=animatedPlayer.z||yaw!=animatedYaw)){
+                targets.UpdatePose(player,yaw);animatedPlayer=player;animatedYaw=yaw;radar.SetHeading(yaw.HasValue);dirty=true;
+            }
+        }
+        Present();
+    }
     void Present(){
-        if(changingHandle||presenting||!IsHandleCreated||!Visible||ClientSize.Width<1||ClientSize.Height<1)return;
+        if(!dirty||changingHandle||presenting||!IsHandleCreated||!Visible||ClientSize.Width<1||ClientSize.Height<1)return;
         presenting=true;
-        try{using(var bitmap=RenderBitmap())LayeredWindow.Present(Handle,bitmap,Left,Top,settings.Opacity);PresentationCount++;PresentationError=null;}
+        try{DrawFrame();surface.Present(Handle,frame,Left,Top,settings.Opacity);PresentationCount++;PresentationError=null;dirty=false;}
         catch(System.ComponentModel.Win32Exception error){PresentationError=error.Message;}
         finally{presenting=false;}
     }
     protected override void OnPaintBackground(PaintEventArgs e){}
     protected override void OnPaint(PaintEventArgs e){}
-    protected override void OnVisibleChanged(EventArgs e){base.OnVisibleChanged(e);Present();}
-    protected override void OnShown(EventArgs e){base.OnShown(e);Present();}
-    protected override void OnSizeChanged(EventArgs e){base.OnSizeChanged(e);if(!changingHandle&&radar!=null){UpdateRadarSize();Present();}}
+    protected override void OnVisibleChanged(EventArgs e){base.OnVisibleChanged(e);dirty=true;Present();}
+    protected override void OnShown(EventArgs e){base.OnShown(e);dirty=true;Present();}
+    protected override void OnSizeChanged(EventArgs e){base.OnSizeChanged(e);if(!changingHandle&&radar!=null){UpdateRadarSize();backgroundDirty=true;dirty=true;Present();}}
     protected override void OnMouseDown(MouseEventArgs e){base.OnMouseDown(e);if(edit&&!settings.PinCenter&&e.Button==MouseButtons.Left){ReleaseCapture();SendMessage(Handle,0xA1,new IntPtr(2),IntPtr.Zero);}}
-    protected override void Dispose(bool disposing){if(disposing)radar.Dispose();base.Dispose(disposing);}
+    protected override void Dispose(bool disposing){if(disposing){radar.Dispose();surface.Dispose();DisposeBuffers();}base.Dispose(disposing);}
     public void UpdateState(string heading,string connection,string summary,GameSnapshot snapshot,bool active) {
+        if(Object.ReferenceEquals(currentSnapshot,snapshot)&&currentActive==active)return;
+        currentSnapshot=snapshot;currentActive=active;animatedPlayer=null;animatedYaw=null;
+        bool oldCampaign=campaign;string oldCount=enemyCount;dirty=true;
         campaign=active&&snapshot!=null&&snapshot.mode=="campaign";
         string count="待核实";TrackingText=null;
         if(campaign) {
             targets.Update(snapshot);
             count=(snapshot.enemies??new TargetInfo[0]).Count(t=>t!=null&&t.known).ToString(System.Globalization.CultureInfo.InvariantCulture);
-            TrackingText="当前区域已确认存活敌人："+count+"\r\n金色=秘密；蓝色=敌人。实心=范围内，空心=范围外。\r\n上三角=较高处，下三角=较低处，圆形=同高附近。\r\n高低以相对垂直差约 "+settings.HeightTolerance.ToString("0.0",System.Globalization.CultureInfo.InvariantCulture)+" 米为阈值，不代表已识别真实楼层。\r\n未确认的秘密状态以较暗标记区分；雷达不判断通路。\r\n未加载区域及未激活波次仍待核实。";
+            TrackingText="当前区域已确认存活敌人："+count+"\r\n金色=秘密；红色=敌人。范围内敌人显示实心标记；范围外敌人使用圆圈外的全向红色实心折角箭头，带深色描边，跟随实际方位，约 12 度内的方向合并，不表示数量或高低。秘密持续显示，范围外为空心。\r\n上三角=较高处，下三角=较低处，圆形=同高附近。\r\n高低以相对垂直差约 "+settings.HeightTolerance.ToString("0.0",System.Globalization.CultureInfo.InvariantCulture)+" 米为阈值，不代表已识别真实楼层。\r\n未确认的秘密状态以较暗标记区分；雷达不判断通路。\r\n未加载区域及未激活波次仍待核实。";
         }
         enemyCount="当前区域敌人："+count;
+        if(oldCount!=enemyCount||oldCampaign!=campaign)backgroundDirty=true;
         radar.UpdateTargets(campaign?targets.Secrets:null,campaign?targets.Enemies:null,radarRange,campaign,
-            snapshot!=null&&snapshot.player!=null&&snapshot.yaw.HasValue);Present();
+            snapshot!=null&&snapshot.player!=null&&snapshot.yaw.HasValue);
     }
 }
 public sealed class MainForm:Form {
@@ -117,7 +158,7 @@ public sealed class MainForm:Form {
     readonly Settings settings=Settings.Load();
     readonly SnapshotStore store=new SnapshotStore();
     readonly Stopwatch clock=Stopwatch.StartNew();
-    readonly System.Windows.Forms.Timer timer=new System.Windows.Forms.Timer {Interval=250};
+    readonly System.Windows.Forms.Timer timer=new System.Windows.Forms.Timer {Interval=33};
     readonly OverlayForm overlay;
     readonly Label status=new Label(),progress=new Label();
     readonly TextBox details=new TextBox {Multiline=true,ReadOnly=true,ScrollBars=ScrollBars.Vertical,BorderStyle=BorderStyle.None};
@@ -128,7 +169,7 @@ public sealed class MainForm:Form {
     [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hwnd,out uint processId);
     public MainForm(string discovered,bool saveSettings=true) {
-        Text="爆弹枪 · 完美通关助手 0.2.1.0 透明度预览"; ClientSize=new Size(820,620); MinimumSize=new Size(760,600);
+        Text="爆弹枪 · 完美通关助手 0.2.2.7"; ClientSize=new Size(820,620); MinimumSize=new Size(760,600);
         StartPosition=FormStartPosition.CenterScreen; Font=new Font("Microsoft YaHei UI",10);
         BackColor=Color.FromArgb(22,26,31); ForeColor=Color.FromArgb(225,233,237);
         settings.GamePath=File.Exists(AppPaths.GameExe(settings.GamePath??""))?settings.GamePath:discovered;
@@ -194,7 +235,7 @@ public sealed class MainForm:Form {
     }
     void RefreshState() {
         tick++;
-        if(tail!=null) try {tail.Poll(line=>store.Accept(line,clock.ElapsedMilliseconds),null);} catch(IOException) {} catch(UnauthorizedAccessException) {failure="无法读取插件日志";}
+        if(tail!=null) try {tail.Poll(line=>store.Accept(line,clock.ElapsedMilliseconds),null,line=>store.Poses.Accept(line,store.Current,clock.ElapsedMilliseconds));} catch(IOException) {} catch(UnauthorizedAccessException) {failure="无法读取插件日志";}
         bool running=gameProcess!=null;
         if(running) try {running=!gameProcess.HasExited;}catch{running=false;}
         if(gameProcess!=null&&!running) {store.Clear();tail=null;gameProcess=null;failure=null;}
@@ -221,8 +262,9 @@ public sealed class MainForm:Form {
             if(s.mode=="results")details.Text="本关已结束。仅使用本次结算数据判定。\r\n\r\n"+String.Join(" · ",s.warnings??new string[0]);
         } else {progress.Text="击杀率  待核实\r\n秘密    待核实 / 待核实";details.Text=header;}
         IntPtr gameWindow=IntPtr.Zero;if(gameProcess!=null)try{gameWindow=gameProcess.MainWindowHandle;}catch(InvalidOperationException){}
-        overlay.UpdateAnchor(gameWindow);
+        if(tick%3==0)overlay.UpdateAnchor(gameWindow);
         overlay.UpdateState(s!=null?s.level:"未连接",header,progress.Text,s,active);
+        overlay.Animate(active?store.Poses.Sample(clock.ElapsedMilliseconds,s):null);
         if(active&&s.mode=="campaign")details.Text=overlay.TrackingText+"\r\n\r\n"+String.Join(" · ",s.warnings??new string[0]);
         uint foreground;GetWindowThreadProcessId(GetForegroundWindow(),out foreground);
         bool foregroundAllowed=foreground==ownerPid||(gameProcess!=null&&foreground==gameProcess.Id);

@@ -16,19 +16,27 @@ l=runtime();encoded=l.eval('Json.encode({text="秘密\\n\\\"😀",empty=Json.arr
 assert encoded.isascii() and json.loads(encoded)=={'text':'秘密\n"😀','empty':[],'no':False}
 print('PASS: ASCII protocol preserves Chinese, escaping, emoji and booleans')
 l=runtime();l.execute('''
-queue={};loops={};samples=0;installs=0
-Adapter={generation=0,install=function()installs=installs+1 end,sample=function()samples=samples+1;return {mode='campaign',generation=0} end}
+queue={};loops={};samples=0;poses=0;installs=0
+Adapter={generation=0,install=function()installs=installs+1 end,sample=function()samples=samples+1;return {mode='campaign',world='world',level='C1M8',generation=0,player={x=0,y=0,z=0},yaw=0} end,pose=function()poses=poses+1;return {world='world',level='C1M8',generation=0,player={x=0,y=0,z=0},yaw=0}end}
 LoopAsync=function(interval,f)loops[#loops+1]={interval=interval,f=f}end
 ExecuteInGameThread=function(f)queue[#queue+1]=f end
 GenerateSDK=function()error('Forbidden SDK generation')end
 ForEachUObject=function()error('Forbidden global scan')end
 ''');l.execute((ROOT/'src/mod/main.lua').read_text(encoding='utf-8'))
 l.execute('''
-assert(installs==1 and #loops==1 and loops[1].interval==500 and samples==0)
+assert(installs==1 and #loops==1 and loops[1].interval==100 and samples==0)
 loops[1].f();loops[1].f();assert(#queue==1)
 table.remove(queue,1)();assert(samples==1)
-loops[1].f();assert(#queue==1)
-''');print('PASS: one 2 Hz game-thread sampler, no piled-up jobs or SDK generation')
+for i=1,4 do loops[1].f();assert(#queue==1);table.remove(queue,1)() end
+assert(samples==1 and poses==4)
+loops[1].f();table.remove(queue,1)();assert(samples==2 and poses==4)
+local stateCount,poseCount=0,0
+for _,message in ipairs(messages)do
+ if message:find('[BGC_STATE]',1,true)then stateCount=stateCount+1 end
+ if message:find('[BGC_POSE]',1,true)then poseCount=poseCount+1 end
+end
+assert(stateCount==3 and poseCount==6)
+''');print('PASS: 10 Hz lightweight pose, 2 Hz full state, one pending job and no SDK generation')
 l=runtime();l.execute('''
 Catalog={C1M4={secretsTotal=1,secrets={{name='secret_one',guid='guid',position={x=10,y=20,z=30}}}}}
 calls={findAll=0};hooks={};notify={}
@@ -53,12 +61,14 @@ function object(classname,objname,props,methods)
 end
 world=object('World','C1M4.C1M4')
 playerDead=false
-player=object('Player','player',{bBeginPlayComplete=true,bPlayerFinishedLevelLoad=true}, {IsDead={fn=function()return playerDead end},K2_GetActorLocation={fn=function()return {x=0,y=0,z=0}end},K2_GetActorRotation={fn=function()return {Yaw=0}end}})
+player=object('Player','player',{bBeginPlayComplete=true,bPlayerFinishedLevelLoad=true}, {IsDead={fn=function()return playerDead end},K2_GetActorLocation={fn=function()return {X=0,Y=0,Z=0}end},K2_GetActorRotation={fn=function()return {Yaw=0}end}})
 meta=object('Meta','meta',{SecretesFoundCount=0},{GetEnemiesKilled={fn=function()return 0 end},GetEnemiesSpawned={fn=function()return 7 end},GetTotalLevelSecrets={params={'ChapterID','LevelID','ReturnValue'},fn=function()return 1 end}})
 instance=object('Instance','instance',{Metagame=meta},{GetChapterID={fn=function()return 0 end},GetLevelID={fn=function()return 3 end}})
 statics=object('Statics','statics',{}, {GetPlayerPawn={params={'WorldContextObject','PlayerIndex','ReturnValue'},fn=function()return player end}})
 secret=object('Secret','secret_one',{bSecretFound=false},{K2_GetActorLocation={fn=function()return {x=10,y=20,z=30}end}})
-enemy=object('Enemy','enemy',{}, {IsDead={fn=function()return false end},K2_GetActorLocation={fn=function()return {x=40,y=0,z=0}end}})
+enemyRoot=object('SceneComponent','enemy_root')
+enemyPosition={X=40,Y=0,Z=0};enemyDead=false
+enemy=object('Enemy','enemy',{RootComponent=enemyRoot}, {IsDead={fn=function()return enemyDead end},K2_GetActorLocation={fn=function()return enemyPosition end}})
 StaticFindObject=function(path)if path=='/Script/Engine.Default__GameplayStatics'then return statics end;return invalid end
 FindFirstOf=function(class)if class=='BGGameInstance'then return instance end;return invalid end
 FindAllOf=function(class)calls.findAll=calls.findAll+1;if class==Profile.secret_class then return {secret}end;if class==Profile.enemy_class then return {enemy}end;return {}end
@@ -72,6 +82,31 @@ assert(s.level=='C1M4' and s.secretsFound==0 and s.secretsTotal==1)
 assert(#s.secrets==1 and s.secrets[1].known==true and #s.enemies==1)
 assert(s.killed==0 and s.spawned==7 and calls.findAll==2)
 Adapter.sample();assert(calls.findAll==2)
+-- A live UObject without a root may return the origin despite IsDead=false.
+-- It must not become a phantom target, but stays registered for reactivation.
+enemyPosition={X=0,Y=0,Z=0};enemy.RootComponent=invalid
+s=Adapter.sample();assert(#s.enemies==0 and #s.warnings>0 and s.enemySpatialChecks.rootMissing==1)
+assert(s.killed==0 and s.spawned==7 and calls.findAll==2)
+enemy.RootComponent=nil;s=Adapter.sample();assert(#s.enemies==0)
+enemy.RootComponent=enemyRoot;s=Adapter.sample()
+assert(#s.enemies==1 and s.enemies[1].position.x==0, 'A genuine rooted actor at the origin must stay visible')
+enemyRoot.alive=false;s=Adapter.sample();assert(#s.enemies==0)
+enemyRoot.alive=true;enemyPosition={X=410,Y=200,Z=-30};s=Adapter.sample()
+assert(#s.enemies==1 and s.enemies[1].position.x==410 and calls.findAll==2)
+enemyDead=true;s=Adapter.sample();assert(#s.enemies==0)
+enemyDead=false;s=Adapter.sample();assert(#s.enemies==1, 'Reactivated rooted enemy returns without another object scan')
+for _,position in ipairs({{X=0/0,Y=0,Z=0},{X=math.huge,Y=0,Z=0},{X=1,Y=2},{X='bad',Y=0,Z=0}}) do
+ enemyPosition=position;s=Adapter.sample();assert(#s.enemies==0)
+end
+enemyPosition={X=40,Y=0,Z=0}
+local unresolved=object('EnemyWithoutRootSchema','unresolved',{}, {IsDead={fn=function()return false end},K2_GetActorLocation={fn=function()error('Unvalidated location getter must not run')end}})
+notify['/Script/Boltgun.'..Profile.enemy_class](unresolved)
+s=Adapter.sample();assert(#s.enemies==1 and calls.findAll==2 and s.enemySpatialChecks.rootSchemaMissing==1)
+print('PASS: rootless zero-origin actors, invalid roots/transforms, real origin targets and reactivation without scans')
+local pose=Adapter.pose();assert(pose and pose.player.x==0 and pose.yaw==0 and pose.generation==Adapter.generation)
+for i=1,20 do assert(Adapter.pose())end;assert(calls.findAll==2)
+player.bPlayerFinishedLevelLoad=false;assert(Adapter.pose()==nil);player.bPlayerFinishedLevelLoad=true
+playerDead=true;assert(Adapter.pose()==nil);playerDead=false
 player.bPlayerFinishedLevelLoad=false;s=Adapter.sample();assert(s.mode=='loading' and s.secretsFound==nil)
 player.bPlayerFinishedLevelLoad=true;playerDead=true;s=Adapter.sample();assert(s.mode=='dead' and s.secretsFound==nil)
 playerDead=false
@@ -100,6 +135,24 @@ assert(s.finalResult.confirmed and s.finalResult.killPercent==85 and s.verified)
 beforeMap();assert(Adapter.final_result==nil and Adapter.result_widget==nil and Adapter.generation>0)
 observedResult=result
 ''');print('PASS: false flags, unloaded actors, one-time discovery and final-state reset')
+print('PASS: rootless zero-origin actors, invalid roots/transforms, real origin targets and reactivation without scans')
+origin=json.loads((ROOT/'tests/fixtures/enemy-origin-c2m9.json').read_text(encoding='utf-8'))
+for actor in origin['actors']:
+    l.globals().OriginBefore=l.table_from(dict(zip(('X','Y','Z'),actor['before'])))
+    l.execute('''
+    Adapter.final_result=nil;Adapter.ended=false;Adapter.result_widget=nil
+    enemy.RootComponent=enemyRoot;enemyPosition=OriginBefore
+    local s=Adapter.sample();assert(#s.enemies==1)
+    -- The real log supplies the coordinate jump. Root loss is the explicitly
+    -- simulated failure condition; it was not present in the old telemetry.
+    enemy.RootComponent=invalid;enemyPosition={X=0,Y=0,Z=0}
+    for i=1,100 do s=Adapter.sample();assert(#s.enemies==0) end
+    enemy.RootComponent=enemyRoot;enemyPosition=OriginBefore
+    s=Adapter.sample();assert(#s.enemies==1 and s.enemies[1].position.x==OriginBefore.X)
+    enemyPosition={X=0,Y=0,Z=0};s=Adapter.sample()
+    assert(#s.enemies==1, 'Origin alone is not a reason to suppress a target')
+    ''')
+print('PASS: real C2M9 coordinate jumps replayed with simulated root loss, genuine origin and recovery')
 observed=json.loads((ROOT/'tests/fixtures/settlement-c1m2.json').read_text(encoding='utf-8'))
 l.globals().Observed=l.table_from(observed)
 l.execute('''

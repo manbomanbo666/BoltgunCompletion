@@ -22,6 +22,7 @@ public sealed class GameSnapshot {
         finalResult.secretsTotal.HasValue && finalResult.secretsTotal>=0 && finalResult.secretsFound==finalResult.secretsTotal; } }
 }
 public sealed class SnapshotStore {
+    public readonly PoseStream Poses=new PoseStream();
     public GameSnapshot Current { get; private set; }
     public long ReceivedAt { get; private set; }
     public int Rejected { get; private set; }
@@ -45,7 +46,7 @@ public sealed class SnapshotStore {
                 s.killPercent=null;
                 s.warnings=(s.warnings??new string[0]).Concat(new[]{"击杀计数与生成计数不一致，参考百分比待核实"}).ToArray();
             }
-            Current=s; ReceivedAt=now; RevisionMismatch=false; return true;
+            Poses.ResetFor(s);Current=s; ReceivedAt=now; RevisionMismatch=false; return true;
         } catch { return Reject(); }
     }
     bool Reject() { Rejected++; return false; }
@@ -54,7 +55,7 @@ public sealed class SnapshotStore {
     static bool Percent(double? v) { return !v.HasValue || (!Double.IsNaN(v.Value)&&!Double.IsInfinity(v.Value)&&v>=0&&v<=100); }
     static bool ValidPoint(Point3 p) { return p==null || new[]{p.x,p.y,p.z}.All(n=>!Double.IsNaN(n)&&!Double.IsInfinity(n)&&Math.Abs(n)<1e12); }
     public bool Fresh(long now) { return Current!=null && now>=ReceivedAt && now-ReceivedAt<=2000; }
-    public void Clear() { Current=null; ReceivedAt=0; Rejected=0; RevisionMismatch=false; }
+    public void Clear() { Current=null; ReceivedAt=0; Rejected=0; RevisionMismatch=false;Poses.Clear(); }
 }
 // Byte-oriented incremental reader: preserves split UTF-8 characters and lines.
 // Starts at the end of the pre-existing log, so stale data is never a handshake.
@@ -66,7 +67,7 @@ public sealed class LogTail {
     readonly byte[] bytes=new byte[65536];
     readonly char[] characters=new char[Encoding.UTF8.GetMaxCharCount(65536)];
     public LogTail(string path) { this.path=path; offset=File.Exists(path)?new FileInfo(path).Length:0; }
-    public int Poll(Action<string> state,Action<string> schema) {
+    public int Poll(Action<string> state,Action<string> schema,Action<string> pose=null) {
         if(!File.Exists(path)) return 0;
         using(var file=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete)) {
             if(file.Length<offset) { offset=0; pending.Clear(); decoder.Reset(); }
@@ -82,6 +83,8 @@ public sealed class LogTail {
                     if(pos>=0) state(line.Substring(pos+11));
                     pos=line.IndexOf("[BGC_SCHEMA]",StringComparison.Ordinal);
                     if(pos>=0 && schema!=null) schema(line.Substring(pos+12));
+                    pos=line.IndexOf("[BGC_POSE]",StringComparison.Ordinal);
+                    if(pos>=0&&pose!=null)pose(line.Substring(pos+10));
                 } else if(pending.Length<1048576) pending.Append(characters[i]);
                 else { pending.Clear(); } // bounded even if another component writes malformed output
             }

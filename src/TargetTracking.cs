@@ -45,6 +45,14 @@ public sealed class TargetTracker {
         if(scene!=key) {scene=key;secrets.Clear();enemies.Clear();}
         Secrets=Views(snapshot,snapshot.secrets,secrets,"秘");Enemies=Views(snapshot,snapshot.enemies,enemies,"敌");
     }
+    public void UpdatePose(Point3 player,double? yaw) {
+        if(player==null)return;
+        foreach(var view in Secrets.Concat(Enemies)) {
+            double x=view.Target.position.x-player.x,y=view.Target.position.y-player.y;
+            view.HorizontalMetres=Math.Sqrt(x*x+y*y)/100;view.HeightMetres=(view.Target.position.z-player.z)/100;
+            view.Bearing=((Math.Atan2(y,x)*180/Math.PI-(yaw??0))%360+540)%360-180;view.HasHeading=yaw.HasValue;
+        }
+    }
     static TargetView[] Views(GameSnapshot snapshot,TargetInfo[] targets,Dictionary<string,int> numbers,string prefix) {
         if(snapshot.player==null)return new TargetView[0];
         var located=(targets??new TargetInfo[0]).Where(t=>t!=null&&t.position!=null).ToArray();

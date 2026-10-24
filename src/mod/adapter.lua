@@ -65,6 +65,22 @@ local function location(o)
     if not pos then return nil end
     return attempt(function() return {x=pos.X,y=pos.Y,z=pos.Z} end)
 end
+local function enemy_location(o)
+    -- Actor validity and IsDead alone do not establish a usable transform.
+    -- A detached/destroyed root can leave GetActorLocation returning zero.
+    -- Check the reflected component reference, never blacklist the origin:
+    -- a rooted, live actor is allowed to actually stand at (0,0,0).
+    if not describe(o).properties.RootComponent then return nil,'rootSchemaMissing' end
+    local root=value(o,'RootComponent')
+    if not valid(root) then return nil,'rootMissing' end
+    local pos=location(o)
+    if not pos then return nil,'positionInvalid' end
+    for _,axis in ipairs({'x','y','z'}) do
+        local n=pos[axis]
+        if type(n)~='number' or n~=n or math.abs(n)>=1e12 then return nil,'positionInvalid' end
+    end
+    return pos
+end
 local function widget_text(widget,field)
     local block=value(widget,field)
     local text=noarg(block,'GetText')
@@ -183,6 +199,18 @@ function A.install()
         end
     end) end)
 end
+-- Lightweight pose path: only the already validated player getters, no actor
+-- discovery, enemy iteration, statistics, or resource loading.
+function A.pose()
+    local player=A.player
+    if A.ended or not A.world or not A.level or not Catalog[A.level] or not in_world(player) then return nil end
+    if primitive(player,'bBeginPlayComplete')==false or primitive(player,'bPlayerFinishedLevelLoad')==false or noarg(player,'IsDead')==true then return nil end
+    local pos=location(player)
+    local rot=noarg(player,'K2_GetActorRotation')
+    local yaw=rot and attempt(function() return rot.Yaw end)
+    if not pos or type(pos.x)~='number' or type(pos.y)~='number' or type(pos.z)~='number' or type(yaw)~='number' then return nil end
+    return {world=A.world,level=A.level,generation=A.generation,player=pos,yaw=yaw}
+end
 function A.sample()
     A.inspect()
     local out={mode='main_menu',verified=P.statistics_verified,generation=A.generation,
@@ -244,6 +272,8 @@ function A.sample()
     local pending=A.pending; A.pending={}
     for _,p in ipairs(pending) do add(p.object,p.kind) end
     local loaded_secrets={}
+    local unlocated_enemies=0
+    local spatial_checks={rootSchemaMissing=0,rootMissing=0,positionInvalid=0}
     for id,entry in pairs(A.registry) do
         local o=entry.object
         if not valid(o) or not in_world(o) then A.registry[id]=nil
@@ -257,8 +287,22 @@ function A.sample()
         elseif entry.kind=='enemy' then
             -- Only a reflected, validated death getter can classify a live target.
             local dead=noarg(o,'IsDead')
-            if type(dead)=='boolean' and not dead then out.enemies[#out.enemies+1]={id=id,label=short(o),position=location(o),known=true} end
+            if type(dead)=='boolean' and not dead then
+                local pos,reason=enemy_location(o)
+                if pos then
+                    out.enemies[#out.enemies+1]={id=id,label=short(o),position=pos,known=true}
+                else
+                    -- Retain the registry entry for possible reactivation.
+                    -- Missing spatial state never means a confirmed death.
+                    unlocated_enemies=unlocated_enemies+1
+                    spatial_checks[reason]=spatial_checks[reason]+1
+                end
+            end
         end
+    end
+    if unlocated_enemies>0 then
+        out.enemySpatialChecks=spatial_checks
+        out.warnings[#out.warnings+1]=tostring(unlocated_enemies)..' 个敌人对象缺少有效空间状态，未绘制，未计为死亡'
     end
     for _,secret in ipairs(level_data.secrets) do
         local found=A.secret_states[secret.name]

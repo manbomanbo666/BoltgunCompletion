@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Script.Serialization;
 using System.Drawing;
 using System.Windows.Forms;
@@ -111,15 +112,154 @@ public static class SelfTests {
         var markers=new TargetView[6];
         for(int i=0;i<markers.Length;i++)markers[i]=new TargetView {Code=i%2==0?"秘":"敌",Target=new TargetInfo {known=i!=0},
             HasHeading=true,Bearing=30+(i%3)*120,HorizontalMetres=i<3?50:150,HeightMetres=new[]{3.0,0,-3.0}[i%3]};
+        foreach(var marker in markers.Where(m=>!m.InRange(100)))marker.Code="秘";
         using(var radar=new RadarControl {Size=new Size(400,400)})using(var bitmap=new Bitmap(400,400)) {
             radar.UpdateTargets(markers,null,100,true,true);radar.CreateControl();radar.DrawToBitmap(bitmap,new Rectangle(0,0,400,400));
             foreach(var marker in markers) {
                 double right,forward;bool outside;marker.RadarPoint(100,out right,out forward,out outside);
                 int x=(int)Math.Round(200+right*radar.PlotDiameter/2),y=(int)Math.Round(200-forward*radar.PlotDiameter/2);
-                bool filled=bitmap.GetPixel(x,y).G>100;
+                var pixel=bitmap.GetPixel(x,y);bool filled=Math.Max(pixel.R,Math.Max(pixel.G,pixel.B))>100;
                 Check(filled==!outside,"rendered "+marker.HeightBand+" elevation marker is "+(outside?"hollow outside range":"filled inside range"));
             }
         }
+    }
+    static void LayoutTests() {
+        var tracker=new TargetTracker();
+        var state=new GameSnapshot {session="edge",world="world",level="C2M4",mode="campaign",player=new Point3(),yaw=0,
+            secrets=new[]{Target("secret",25000,0,0),Target("secret-3",30000,0,-900),Target("secret-1",40000,0,900),Target("secret-2",50000,0,0)},
+            enemies=new TargetInfo[0]};
+        tracker.Update(state);
+        var views=tracker.Secrets.Concat(tracker.Enemies).ToArray();var layout=new RadarLayout(views);
+        var markers=layout.Arrange(100,190);var positions=new Dictionary<string,PointF>();
+        foreach(var marker in markers)positions[marker.View.Target.id]=new PointF((float)marker.Right,(float)marker.Forward);
+        bool separated=true;
+        for(int i=0;i<markers.Length;i++)for(int j=0;j<i;j++) {
+            double dx=markers[i].Right-markers[j].Right,dy=markers[i].Forward-markers[j].Forward;
+            separated&=dx*dx+dy*dy>=RadarLayout.Separation*RadarLayout.Separation-0.000001;
+        }
+        Check(separated&&markers.All(m=>m.Outside),"four co-bearing outside targets occupy separate hollow positions");
+        Check(markers.All(m=>Math.Abs(m.AnchorRight)<0.00001&&Math.Abs(m.AnchorForward-190)<0.00001&&Math.Sqrt(m.Right*m.Right+m.Forward*m.Forward)>=76),"displaced symbols retain an exact bearing anchor in a bounded band");
+        Check(Math.Abs(positions["secret"].Y-190)<0.00001&&markers[markers.Length-1].View.Target.id=="secret","first secret keeps the outer track in a dense secret cluster");
+        Array.Reverse(views);var reordered=new RadarLayout(views).Arrange(100,190);
+        Check(reordered.All(m=>Math.Abs(m.Right-positions[m.View.Target.id].X)<0.00001&&Math.Abs(m.Forward-positions[m.View.Target.id].Y)<0.00001),"snapshot array reordering cannot swap edge tracks");
+        tracker.UpdatePose(new Point3(),73);var rotated=layout.Arrange(100,190);
+        Check(rotated.All(m=>{var p=positions[m.View.Target.id];return Math.Abs(Math.Sqrt(m.Right*m.Right+m.Forward*m.Forward)-Math.Sqrt(p.X*p.X+p.Y*p.Y))<0.0001;}),"turning in place rotates markers without changing collision tracks");
+        Check(Object.ReferenceEquals(markers,rotated),"animated layout reuses its marker and paint-order buffers");
+        state.secrets=new[]{state.secrets[0]};state.enemies=new[]{Target("inside",10000,0,0)};tracker.Update(state);
+        markers=new RadarLayout(tracker.Secrets.Concat(tracker.Enemies).ToArray()).Arrange(100,190);
+        var inside=Array.Find(markers,m=>!m.Outside);var outside=Array.Find(markers,m=>m.Outside);
+        Check(inside.View.Target.id=="inside"&&Math.Abs(inside.Right)<0.00001&&Math.Abs(inside.Forward-190)<0.00001&&Object.ReferenceEquals(markers[markers.Length-1],inside),"in-range target retains its exact distance and paints after edge markers");
+        Check(Math.Abs(outside.Forward-168)<0.00001,"outside marker leaves room for an in-range target on the boundary");
+        state.enemies=new TargetInfo[0];tracker.Update(state);
+        markers=new RadarLayout(tracker.Secrets).Arrange(100,190);
+        Check(Math.Abs(markers[0].Forward-190)<0.00001,"isolated outside target stays on the original edge");
+        state.secrets=state.secrets.Concat(Enumerable.Range(1,30).Select(i=>Target("dense-"+i,30000+i*100,0,0))).ToArray();tracker.Update(state);
+        markers=new RadarLayout(tracker.Secrets.Concat(tracker.Enemies).ToArray()).Arrange(100,190);
+        Check(markers.Length==31&&markers.All(m=>m.Outside&&Math.Abs(m.AnchorRight)<0.00001&&Math.Abs(m.AnchorForward-190)<0.00001)&&markers[markers.Length-1].View.Target.id=="secret","dense bearing retains all targets with truthful leader anchors");
+        Check(NoOutsideOverlap(markers),"thirty-one co-bearing symbols no longer collapse onto four tracks");
+        Check(markers.Any(m=>m.Leader&&Math.Abs(m.AngleOffset)>0),"dense targets have a leader when their symbol is displaced sideways");
+        var denseLayout=new RadarLayout(tracker.Secrets.Concat(tracker.Enemies).ToArray());denseLayout.Arrange(100,190);
+        tracker.UpdatePose(new Point3(),179);var turned=denseLayout.Arrange(100,190);
+        double anchorAngle=-179*Math.PI/180;
+        Check(turned.All(m=>Math.Abs(m.AnchorRight-Math.Sin(anchorAngle)*190)<0.00001&&Math.Abs(m.AnchorForward-Math.Cos(anchorAngle)*190)<0.00001),"turning rotates exact bearing anchors with the player");
+        tracker.UpdatePose(new Point3(),0);
+        using(var radar=new RadarControl {Size=new Size(404,416)})using(var image=new Bitmap(404,416))using(var g=Graphics.FromImage(image)) {
+            radar.UpdateTargets(tracker.Secrets,tracker.Enemies,100,true,true);
+            var appearance=Invisible();appearance.Secrets=100;appearance.Enemies=100;radar.Draw(g,new Rectangle(Point.Empty,radar.Size),appearance,false,5);
+            Color secretEdge=image.GetPixel(208,18);
+            Check(secretEdge.R>secretEdge.B&&secretEdge.A>0,"gold secret outline remains visible in a dense secret cluster");
+        }
+        RangeVisibilityTests();
+    }
+    static void RangeVisibilityTests() {
+        var state=new GameSnapshot {session="range",world="world",level="C2M7",mode="campaign",player=new Point3(),yaw=0,
+            secrets=new[]{Target("distant-secret",30000,0,0)},enemies=new[]{Target("enemy",15000,0,0)}};
+        var tracker=new TargetTracker();tracker.Update(state);int number=tracker.Enemies[0].Number;
+        var layout=new RadarLayout(tracker.Secrets.Concat(tracker.Enemies).ToArray());
+        var markers=layout.Arrange(100,190);
+        Check(markers.Length==1&&markers[0].View.Target.id=="distant-secret"&&markers[0].Outside,"outside enemy is hidden while a distant secret remains hollow and visible");
+        Check(layout.Arrange(250,190).Length==2&&layout.Arrange(100,190).Length==1,"changing range immediately shows and hides the cached enemy");
+        tracker.UpdatePose(new Point3 {x=5000},0);
+        Check(layout.Arrange(100,190).Length==2&&tracker.Enemies[0].Number==number,"movement to the exact range boundary reveals the same enemy without a new snapshot");
+        tracker.UpdatePose(new Point3 {x=4999},0);
+        Check(layout.Arrange(100,190).Length==1&&state.enemies.Length==1&&state.enemies[0].known,"moving outside range hides the marker without removing the confirmed enemy");
+        var settings=new Settings {Appearance=Invisible(),ShowPlayerArrow=false};settings.Appearance.Enemies=100;settings.Appearance.Counter=100;
+        using(var form=new OverlayForm(settings)) {
+            form.UpdateState(state.level,"ready","",state,true);
+            using(var image=form.RenderBitmap())Check(VisiblePixels(image,new Rectangle(8,36,404,416))>0&&form.Radar.OutsideEnemyDirections.Count==1&&form.TrackingText.Contains("存活敌人：1"),"outside enemy has a coarse direction while remaining in the area count");
+        }
+        EnemyDirectionTests();
+    }
+    static void EnemyDirectionTests() {
+        var enemies=Enumerable.Range(0,80).Select(i=>new TargetView {Code="敌"+i,Number=i,Target=new TargetInfo {known=true},HasHeading=true,HorizontalMetres=150,Bearing=(i%8)*45}).ToArray();
+        using(var radar=new RadarControl {Size=new Size(404,416)}) {
+            radar.UpdateTargets(null,enemies,100,true,true);
+            Check(radar.VisibleTargetCount==0&&radar.OutsideEnemyDirections.Count==8,"coincident distant enemies share hints without individual symbols");
+            var appearance=Invisible();appearance.Enemies=100;
+            var bounds=new Rectangle(8,36,404,416);
+            using(var image=new Bitmap(420,460))using(var g=Graphics.FromImage(image)) {
+                radar.DrawTargets(g,bounds,appearance,false,3);
+                bool allDirections=true,noInterior=true,noClipping=true;
+                for(int sector=0;sector<8;sector++) {
+                    double angle=sector*Math.PI/4;int x=(int)Math.Round(210+Math.Sin(angle)*201),y=(int)Math.Round(244-Math.Cos(angle)*201);
+                    allDirections&=VisiblePixels(image,Rectangle.Intersect(new Rectangle(x-6,y-6,13,13),new Rectangle(Point.Empty,image.Size)))>0;
+                }
+                for(int y=0;y<image.Height;y++)for(int x=0;x<image.Width;x++) {
+                    if((x-210)*(x-210)+(y-244)*(y-244)<=180*180&&image.GetPixel(x,y).A!=0)noInterior=false;
+                    if((x==0||x==image.Width-1||y==0||y==image.Height-1)&&image.GetPixel(x,y).A!=0)noClipping=false;
+                }
+                Check(allDirections&&noInterior&&noClipping,"large chevrons fit the overlay and stay within the rim band");
+                Check(VisiblePixels(image,new Rectangle(Point.Empty,image.Size))>1600,"large filled direction hints have a substantial visible area");
+                radar.UpdateTargets(null,enemies.Take(8).ToArray(),100,true,true);
+                using(var single=new Bitmap(420,460))using(var sg=Graphics.FromImage(single)) {
+                    radar.DrawTargets(sg,bounds,appearance,false,3);
+                    Check(SamePixels(image,single),"coincident enemies draw one hint with consistent opacity");
+                }
+                Color red=image.GetPixel(210,45);Check(red.R>220&&red.G<110&&red.B<110,"outside direction hints use red");
+                appearance.Enemies=50;g.Clear(Color.Transparent);radar.DrawTargets(g,bounds,appearance,false,3);
+                Check(image.GetPixel(210,45).A>=125&&image.GetPixel(210,45).A<=130,"direction hints follow enemy component opacity");
+                appearance.Enemies=0;g.Clear(Color.Transparent);radar.DrawTargets(g,bounds,appearance,false,3);
+                Check(VisiblePixels(image,new Rectangle(Point.Empty,image.Size))==0,"zero enemy opacity also hides directional hints");
+            }
+            radar.UpdateTargets(null,enemies,100,true,true);
+            radar.SetRange(250);Check(radar.OutsideEnemyDirections.Count==0&&radar.VisibleTargetCount==80,"increasing range replaces distant direction hints with regular target symbols");
+            radar.SetRange(100);radar.SetHeading(false);Check(radar.OutsideEnemyDirections.Count==0,"missing heading clears directional hints");
+            radar.UpdateTargets(null,enemies,100,false,true);Check(radar.OutsideEnemyDirections.Count==0,"inactive and interrupted states clear directional hints");
+        }
+        var scattered=Enumerable.Range(0,24).Select(i=>new TargetView {Code="敌"+i,Number=i,Target=new TargetInfo {known=true},HasHeading=true,HorizontalMetres=150,Bearing=i*15+7.3}).ToArray();
+        var hints=new RadarDirections(scattered);hints.Arrange(100,true);var buffer=hints.Bearings;
+        Check(hints.Count==24&&RadarDirections.Gap(hints.Bearings[0],7.3)<0.000001,"continuous bearings retain more than eight distinct directions without snapping");
+        foreach(var enemy in scattered)enemy.Bearing+=0.7;hints.Arrange(100,true);
+        Check(hints.Count==24&&RadarDirections.Gap(hints.Bearings[0],8)<0.000001&&Object.ReferenceEquals(buffer,hints.Bearings),"small rotations move hints continuously while reusing their buffer");
+        foreach(var bearing in new[]{-179.9,-22.501,-22.5,22.499,22.5,337.5,382.5,180.0,-180.0}) {
+            var single=new RadarDirections(new[]{new TargetView {Code="敌1",Target=new TargetInfo(),HasHeading=true,HorizontalMetres=150,Bearing=bearing}});single.Arrange(100,true);
+            Check(single.Count==1&&RadarDirections.Gap(single.Bearings[0],bearing)<0.000001,"continuous bearing and wrap "+bearing);
+        }
+        var close=new[]{179.0,-179.0,160.0,22.4,22.6}.Select((a,i)=>new TargetView {Code="敌"+i,Number=i,Target=new TargetInfo(),HasHeading=true,HorizontalMetres=150,Bearing=a}).ToArray();
+        var merged=new RadarDirections(close);merged.Arrange(100,true);
+        Check(merged.Count==3&&close.All(t=>merged.Bearings.Take(merged.Count).Any(b=>RadarDirections.Gap(b,t.Bearing)<RadarDirections.MergeDegrees)),"nearby directions merge across the rear seam while every enemy direction remains covered");
+        var reversed=new RadarDirections(close.Reverse().ToArray());reversed.Arrange(100,true);
+        Check(reversed.Bearings.Take(reversed.Count).SequenceEqual(merged.Bearings.Take(merged.Count)),"snapshot ordering cannot change the representative enemy direction");
+        var state=new GameSnapshot {session="directions",world="world",level="C2M7",mode="campaign",player=new Point3(),yaw=0,
+            enemies=new[]{Target("enemy",15000,0,0)},secrets=new[]{Target("secret",0,30000,0)}};
+        var tracker=new TargetTracker();tracker.Update(state);
+        using(var radar=new RadarControl {Size=new Size(404,416)}) {
+            radar.UpdateTargets(tracker.Secrets,tracker.Enemies,100,true,true);
+            Check(radar.OutsideEnemyDirections.Count==1&&radar.VisibleTargetCount==1,"distant secrets stay separate and never create enemy directions");
+            tracker.UpdatePose(new Point3(),31.7);Check(RadarDirections.Gap(radar.OutsideEnemyDirections.Bearings[0],-31.7)<0.000001,"turning updates continuous directions without a full snapshot");
+            tracker.UpdatePose(new Point3 {x=5000},0);Check(radar.OutsideEnemyDirections.Count==0&&radar.VisibleTargetCount==2,"moving to the range boundary removes the hint and restores the enemy symbol");
+            using(var image=new Bitmap(420,460))using(var g=Graphics.FromImage(image)) {
+                var appearance=Invisible();appearance.Enemies=100;radar.DrawTargets(g,new Rectangle(8,36,404,416),appearance,false,3);
+                Color red=image.GetPixel(210,54);Check(red.R>220&&red.G<110&&red.B<110,"in-range enemy symbols also use red");
+            }
+        }
+    }
+    static bool NoOutsideOverlap(RadarMarker[] markers) {
+        for(int i=0;i<markers.Length;i++)for(int j=0;j<i;j++)if(markers[i].Outside||markers[j].Outside) {
+            double dx=markers[i].Right-markers[j].Right,dy=markers[i].Forward-markers[j].Forward;
+            if(dx*dx+dy*dy<RadarLayout.Separation*RadarLayout.Separation-0.000001)return false;
+        }
+        return true;
     }
     public static int RenderRadars(string directory) {
         Directory.CreateDirectory(directory);Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
@@ -159,6 +299,16 @@ public static class SelfTests {
                 form.Close();
             }
         }
+        s.mode="campaign";s.finalResult=null;s.player=new Point3();s.yaw=0;
+        s.secrets=new[]{Target("edge-secret",25000,0,0),Target("edge-up",-25000,500,900),Target("inside-secret",3500,2500,0)};
+        s.enemies=Enumerable.Range(1,18).Select(i=> {
+            double angle=(i<=6?(i-3)*0.4:i*25)*Math.PI/180;
+            return Target("edge-enemy-"+i,30000*Math.Cos(angle),30000*Math.Sin(angle),(i%3-1)*900);
+        }).Concat(new[]{Target("inside-enemy",10000,0,0)}).ToArray();
+        using(var form=new OverlayForm(new Settings {Opacity=100,ShowPlayerArrow=false})) {
+            form.UpdateState(s.level,"ready","",s,true);
+            using(var bitmap=form.RenderBitmap())bitmap.Save(Path.Combine(directory,"radar-crowded-edge.png"));
+        }
         using(var dialog=new AppearanceDialog(new Settings(),()=>{},false)) {
             dialog.Location=new Point(-32000,-32000);dialog.StartPosition=FormStartPosition.Manual;dialog.Show();Application.DoEvents();CheckLabels(dialog);
             using(var bitmap=new Bitmap(dialog.Width,dialog.Height)){dialog.DrawToBitmap(bitmap,new Rectangle(Point.Empty,bitmap.Size));bitmap.Save(Path.Combine(directory,"radar-settings.png"));}dialog.Close();
@@ -190,7 +340,7 @@ public static class SelfTests {
         }
     }
     public static int Run() {
-        RadarTests();
+        RadarTests();LayoutTests();PoseTests();CacheTests();
         var store=new SnapshotStore();
         Check(store.Accept(Row(1,"campaign",1),1000),"valid state accepted");
         Check(store.Fresh(3000)&&!store.Fresh(3001),"stale after two seconds");
@@ -240,8 +390,55 @@ public static class SelfTests {
             tail.Poll(received.Add,null);Check(received.Count==1&&received[0].Contains("中文会话"),"split UTF-8 preserved");
             File.WriteAllText(path,"[BGC_STATE]"+Row(3,"main_menu",2)+"\n",new UTF8Encoding(false));
             tail.Poll(received.Add,null);Check(received.Count==2,"log truncation handled");
+            var poses=new List<string>();File.AppendAllText(path,"[BGC_POSE]{\"poseSeq\":1}\n",new UTF8Encoding(false));tail.Poll(received.Add,null,poses.Add);
+            Check(poses.Count==1&&poses[0]=="{\"poseSeq\":1}"&&received.Count==2,"pose messages are routed separately from full-state messages");
         } finally {File.Delete(path);Directory.Delete(dir);}
         Console.WriteLine("HOST_TESTS_PASSED");return 0;
+    }
+    static void PoseTests() {
+        var serializer=new JavaScriptSerializer();var store=new SnapshotStore();
+        var state=new GameSnapshot {v=1,build="14893097",pluginVersion="0.1.0",revision=AppPaths.Revision,session="pose",seq=1,generation=1,world="world",level="C1M8",mode="campaign",player=new Point3(),yaw=0};
+        Check(store.Accept(serializer.Serialize(state),1000),"pose test full state accepted");
+        var pose=new PlayerPose {v=1,build="14893097",pluginVersion="0.1.0",revision=AppPaths.Revision,session="pose",poseSeq=1,generation=1,world="world",level="C1M8",player=new Point3(),yaw=179};
+        Check(store.Poses.Accept(serializer.Serialize(pose),store.Current,1000),"matching lightweight pose accepted");
+        pose.poseSeq=2;pose.player.x=100;pose.yaw=-179;Check(store.Poses.Accept(serializer.Serialize(pose),store.Current,1100),"next lightweight pose accepted");
+        var smooth=store.Poses.Sample(1150,store.Current);
+        Check(Math.Abs(smooth.player.x-50)<0.00001&&Math.Abs(Math.Abs(smooth.yaw.Value)-180)<0.00001,"position interpolation and shortest yaw arc preserve wrap-around");
+        Check(!store.Poses.Accept(serializer.Serialize(pose),store.Current,1200),"duplicate pose sequence rejected");
+        pose.poseSeq=3;pose.generation=2;Check(!store.Poses.Accept(serializer.Serialize(pose),store.Current,1200),"old or future scene poses cannot mix into current scene");
+        pose.generation=1;pose.player.x=10000;Check(store.Poses.Accept(serializer.Serialize(pose),store.Current,1200)&&store.Poses.Sample(1200,store.Current).player.x==10000,"teleport-sized change snaps rather than crossing intervening space");
+        var malformed=serializer.Deserialize<Dictionary<string,object>>(serializer.Serialize(pose));((Dictionary<string,object>)malformed["player"]).Remove("x");
+        Check(!store.Poses.Accept(serializer.Serialize(malformed),store.Current,1250),"missing pose coordinates cannot silently become zero");
+        Check(store.Poses.Sample(1600,store.Current)==null,"late poses expire without extrapolating");
+        pose.poseSeq=4;Check(store.Poses.Accept(serializer.Serialize(pose),store.Current,3500)&&!store.Fresh(3500),"pose heartbeat never renews old full statistics");
+        state.seq=2;state.generation=2;store.Accept(serializer.Serialize(state),3600);
+        Check(store.Poses.Sample(3600,store.Current)==null,"scene transition clears interpolation history");
+        pose.generation=2;pose.poseSeq=5;store.Poses.Accept(serializer.Serialize(pose),store.Current,3600);
+        state.seq=3;state.mode="results";store.Accept(serializer.Serialize(state),3700);
+        Check(store.Poses.Sample(3700,store.Current)==null,"results clear the lightweight pose stream");
+    }
+    static void CacheTests() {
+        var state=new GameSnapshot {session="cache",world="world",level="C1M8",mode="campaign",player=new Point3(),yaw=0,
+            secrets=new[]{Target("secret",1000,0,0)},enemies=new[]{Target("enemy",0,1000,0)}};
+        var settings=new Settings {Opacity=100,OverlayX=-32000,OverlayY=-32000};
+        using(var form=new OverlayForm(settings)) {
+            form.Location=new Point(-32000,-32000);form.Show();form.UpdateState("C1M8","ready","",state,true);form.Animate(null);
+            int buffers=form.BufferAllocations,native=form.NativeSurfaceAllocations,backgrounds=form.BackgroundBuildCount;
+            for(int i=1;i<=60;i++)form.Animate(new PlayerPose {player=new Point3 {x=i},yaw=(double)i});
+            Check(form.PresentationError==null&&form.BufferAllocations==buffers&&form.NativeSurfaceAllocations==native,"animation reuses bitmap buffers and native DIB surface");
+            Check(form.BackgroundBuildCount==backgrounds,"moving player does not redraw static background, grid or count text");
+            int presentations=form.PresentationCount;form.Animate(new PlayerPose {player=new Point3 {x=60},yaw=60});
+            Check(form.PresentationCount==presentations,"unchanged pose does not generate a redundant frame");
+            using(var direct=form.RenderBitmap())using(var cached=form.CachedFrame())Check(SamePixels(direct,cached),"cached frame matches the full renderer pixel for pixel");
+            settings.Appearance.Background=0;settings.Appearance.Counter=50;settings.Appearance.Rings=30;settings.Appearance.Axes=70;settings.Appearance.Enemies=50;form.ApplyAppearance();
+            using(var direct=form.RenderBitmap())using(var cached=form.CachedFrame())Check(SamePixels(direct,cached),"cached translucent layers preserve all component alpha values");
+            form.Close();
+        }
+    }
+    static bool SamePixels(Bitmap a,Bitmap b){
+        if(a.Size!=b.Size)return false;
+        for(int y=0;y<a.Height;y++)for(int x=0;x<a.Width;x++)if(a.GetPixel(x,y)!=b.GetPixel(x,y))return false;
+        return true;
     }
 }
 }

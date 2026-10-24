@@ -1,0 +1,34 @@
+{
+  "level": "C2M9",
+  "generation": 23,
+  "observedLast": "2026-10-24 20:08:55",
+  "note": "Actor positions observed in the real log. Root loss is simulated in the test; original telemetry did not record RootComponent.",
+  "actors": [
+    {
+      "id": "BP_Enemy_Nurgling01_C /Game/Maps/Chapter_2/C2M9.C2M9:PersistentLevel.BP_Enemy_Nurgling01_C_2147111562",
+      "before": [
+        9589.052734,
+        11424.44434,
+        105.3027954
+      ],
+      "after": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "BP_Enemy_Nurgling01_C /Game/Maps/Chapter_2/C2M9.C2M9:PersistentLevel.BP_Enemy_Nurgling01_C_2147111577",
+      "before": [
+        9237.064453,
+        11539.89062,
+        333.1652832
+      ],
+      "after": [
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}
