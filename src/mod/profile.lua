@@ -11,6 +11,12 @@ return {
     meta_class = 'BGMetaGame',
     player_class = 'BGPlayerCharacter',
     mode_class = 'BGGameplayGameMode',
+    -- Exact shipped assets from this build's verified pak directory index.
+    -- Horde_1_Walkable is a streaming sublevel, not another playable arena.
+    horde = {
+        worlds = {['World /Game/Maps/_DLC/Horde/Horde_1.Horde_1']=true},
+        mode_class = 'BlueprintGeneratedClass /Game/BP_GameMode_HordeGamplay.BP_GameMode_HordeGamplay_C'
+    },
     secret_class = 'BGActivatable_Volume_SecretUnlock',
     enemy_class = 'BGEnemyBase',
     level_data_class = 'BGLevelData',

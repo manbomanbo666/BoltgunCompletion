@@ -29,7 +29,7 @@ LoopAsync(100,function()
             if full then
                 state.sampleMs=(os.clock()-started)*1000
                 emit(state)
-                if state.mode=='campaign' then emit_pose(state) end
+                if state.mode=='campaign' or state.mode=='horde' then emit_pose(state) end
             else emit_pose(state) end
         else
             Bridge.failures=Bridge.failures+1

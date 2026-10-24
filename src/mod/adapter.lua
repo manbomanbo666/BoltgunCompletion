@@ -102,7 +102,7 @@ local function find(class)
 end
 function A.reset()
     A.generation=A.generation+1
-    A.registry={}; A.world=nil; A.level=nil; A.secret_states={}; A.secret_positions={}
+    A.registry={}; A.world=nil; A.level=nil; A.mode=nil; A.secret_states={}; A.secret_positions={}
     -- Construction notifications for the next world may arrive before reset.
     -- Keep the bounded pending queue; each item is filtered by its actual world.
     A.needs_bootstrap=true; A.final_result=nil; A.meta=nil; A.player=nil; A.ended=false
@@ -167,6 +167,7 @@ function A.install()
     hook(P.hooks.restart,function() A.reset() end)
     hook(P.hooks.restored,nil,function()
         A.registry={}; A.secret_states={}; A.secret_positions={}; A.needs_bootstrap=true; A.final_result=nil; A.ended=false
+        A.mode=nil
         A.result_widget=nil; A.result_widget_generation=nil; A.results_inspected=false
         A.last_kills_text=nil; A.last_secrets_text=nil
         A.generation=A.generation+1
@@ -203,7 +204,7 @@ end
 -- discovery, enemy iteration, statistics, or resource loading.
 function A.pose()
     local player=A.player
-    if A.ended or not A.world or not A.level or not Catalog[A.level] or not in_world(player) then return nil end
+    if A.ended or not A.world or not A.level or (A.mode~='campaign' and A.mode~='horde') or not in_world(player) then return nil end
     if primitive(player,'bBeginPlayComplete')==false or primitive(player,'bPlayerFinishedLevelLoad')==false or noarg(player,'IsDead')==true then return nil end
     local pos=location(player)
     local rot=noarg(player,'K2_GetActorRotation')
@@ -236,27 +237,43 @@ function A.sample()
     out.world=world; out.generation=A.generation
     out.level=A.level
     local level_data=Catalog[A.level]
-    if not level_data then A.pending={};out.mode='unsupported'; return out end
-    out.mode='campaign'
-    out.secretsTotal=level_data.secretsTotal
-    A.meta=value(instance,'Metagame')
-    local meta=A.meta
-    local chapter=noarg(instance,'GetChapterID')
-    local level_id=noarg(instance,'GetLevelID')
+    local horde=P.horde and P.horde.worlds[world]==true
+    if horde then
+        local game_mode=call(A.gameplay_statics,'GetGameMode',{'WorldContextObject','ReturnValue'},instance)
+        out.gameMode=name(attempt(function() return game_mode:GetClass() end))
+        if out.gameMode~=P.horde.mode_class then
+            A.mode=nil;out.mode='unsupported'
+            out.warnings[#out.warnings+1]='围攻地图的游戏模式尚未确认：'..tostring(out.gameMode)
+            return out
+        end
+    elseif not level_data then
+        A.mode=nil;A.pending={};out.mode='unsupported'; return out
+    end
+    A.mode=horde and 'horde' or 'campaign'
+    out.mode=A.mode
+    -- Campaign metadata and its settlement semantics do not describe horde.
+    -- Horde deliberately publishes no guessed totals, percentages or results.
     local runtime_total
-    if type(chapter)=='number' and type(level_id)=='number' then
-        runtime_total=call(meta,'GetTotalLevelSecrets',{'ChapterID','LevelID','ReturnValue'},chapter,level_id)
+    if not horde then
+        out.secretsTotal=level_data.secretsTotal
+        A.meta=value(instance,'Metagame')
+        local meta=A.meta
+        local chapter=noarg(instance,'GetChapterID')
+        local level_id=noarg(instance,'GetLevelID')
+        if type(chapter)=='number' and type(level_id)=='number' then
+            runtime_total=call(meta,'GetTotalLevelSecrets',{'ChapterID','LevelID','ReturnValue'},chapter,level_id)
+        end
+        if type(runtime_total)=='number' and runtime_total~=out.secretsTotal then
+            out.warnings[#out.warnings+1]='关卡秘密总数与目录不一致，判定已停止'
+            out.verified=false
+        end
+        out.secretsFound=number(primitive(meta,'SecretesFoundCount'))
+        out.killed=number(noarg(meta,'GetEnemiesKilled'))
+        out.spawned=number(noarg(meta,'GetEnemiesSpawned'))
+        -- The base-game results blueprint uses int->float, division, *100 and FFloor.
+        -- Keep this as a progress estimate until a real results widget confirms it.
+        out.killPercent=progress_percent(out.killed,out.spawned)
     end
-    if type(runtime_total)=='number' and runtime_total~=out.secretsTotal then
-        out.warnings[#out.warnings+1]='关卡秘密总数与目录不一致，判定已停止'
-        out.verified=false
-    end
-    out.secretsFound=number(primitive(meta,'SecretesFoundCount'))
-    out.killed=number(noarg(meta,'GetEnemiesKilled'))
-    out.spawned=number(noarg(meta,'GetEnemiesSpawned'))
-    -- The base-game results blueprint uses int->float, division, *100 and FFloor.
-    -- Keep this as a progress estimate until a real results widget confirms it.
-    out.killPercent=progress_percent(out.killed,out.spawned)
     out.player=location(player)
     local rot=noarg(player,'K2_GetActorRotation')
     if rot then out.yaw=attempt(function() return rot.Yaw end) end
@@ -284,6 +301,9 @@ function A.sample()
             if type(found)=='boolean' then A.secret_states[key]=found end
             local current_position=location(o)
             if current_position then A.secret_positions[key]=current_position end
+            if horde and found~=true and current_position then
+                out.secrets[#out.secrets+1]={id=id,label=key,position=current_position,known=type(found)=='boolean'}
+            end
         elseif entry.kind=='enemy' then
             -- Only a reflected, validated death getter can classify a live target.
             local dead=noarg(o,'IsDead')
@@ -304,14 +324,14 @@ function A.sample()
         out.enemySpatialChecks=spatial_checks
         out.warnings[#out.warnings+1]=tostring(unlocated_enemies)..' 个敌人对象缺少有效空间状态，未绘制，未计为死亡'
     end
-    for _,secret in ipairs(level_data.secrets) do
+    for _,secret in ipairs(level_data and level_data.secrets or {}) do
         local found=A.secret_states[secret.name]
         if found~=true then
             out.secrets[#out.secrets+1]={id=secret.guid or secret.name,label=secret.name,position=A.secret_positions[secret.name] or secret.position,
                 known=loaded_secrets[secret.name]==true and type(found)=='boolean'}
         end
     end
-    if A.ended and A.final_result and A.final_result.world==A.world then
+    if not horde and A.ended and A.final_result and A.final_result.world==A.world then
         out.mode='results'
         local widget=A.result_widget
         if valid(widget) and A.result_widget_generation==A.generation then
@@ -366,7 +386,10 @@ function A.sample()
             and runtime_total==out.secretsTotal
     end
     if out.mode=='campaign' then out.warnings[#out.warnings+1]='未激活波次及未加载区域待核实' end
-    if not out.verified then out.warnings[#out.warnings+1]='统计口径尚待游戏结算核对' end
+    if horde then
+        out.verified=false
+        out.warnings[#out.warnings+1]='围攻雷达仅追踪已加载且可定位的目标；未刷出波次不计入当前区域敌人'
+    elseif not out.verified then out.warnings[#out.warnings+1]='统计口径尚待游戏结算核对' end
     return out
 end
 return A

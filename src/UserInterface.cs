@@ -25,7 +25,7 @@ public sealed class Settings {
     public void Save() {Normalize();Directory.CreateDirectory(Path.GetDirectoryName(PathName));File.WriteAllText(PathName,new JavaScriptSerializer().Serialize(this),new UTF8Encoding(false));}
 }
 public sealed class OverlayForm:Form {
-    bool edit,campaign,changingHandle,presenting;
+    bool edit,trackingActive,changingHandle,presenting;
     bool dirty=true,backgroundDirty=true,currentActive;
     GameSnapshot currentSnapshot;
     Point3 animatedPlayer;double? animatedYaw;
@@ -88,7 +88,7 @@ public sealed class OverlayForm:Form {
             g.Clear(Color.Transparent);
             using(var brush=new SolidBrush(RadarAppearance.Fade(BackColor,settings.Appearance.Background)))g.FillRectangle(brush,ClientRectangle);
             g.TextRenderingHint=System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-            using(var brush=new SolidBrush(RadarAppearance.Fade(campaign?ForeColor:Color.FromArgb(232,189,89),settings.Appearance.Counter)))
+            using(var brush=new SolidBrush(RadarAppearance.Fade(trackingActive?ForeColor:Color.FromArgb(232,189,89),settings.Appearance.Counter)))
             using(var format=new StringFormat {Alignment=StringAlignment.Center,LineAlignment=StringAlignment.Center})
                 g.DrawString(enemyCount,Font,brush,new Rectangle(8,8,Math.Max(1,ClientSize.Width-16),28),format);
             radar.Draw(g,RadarBounds,settings.Appearance,settings.ShowPlayerArrow&&!settings.PinCenter,settings.HeightTolerance);
@@ -104,7 +104,7 @@ public sealed class OverlayForm:Form {
             backdropCanvas.Clear(Color.Transparent);
             using(var brush=new SolidBrush(RadarAppearance.Fade(BackColor,settings.Appearance.Background)))backdropCanvas.FillRectangle(brush,ClientRectangle);
             backdropCanvas.TextRenderingHint=System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-            using(var brush=new SolidBrush(RadarAppearance.Fade(campaign?ForeColor:Color.FromArgb(232,189,89),settings.Appearance.Counter)))
+            using(var brush=new SolidBrush(RadarAppearance.Fade(trackingActive?ForeColor:Color.FromArgb(232,189,89),settings.Appearance.Counter)))
             using(var format=new StringFormat {Alignment=StringAlignment.Center,LineAlignment=StringAlignment.Center})backdropCanvas.DrawString(enemyCount,Font,brush,new Rectangle(8,8,Math.Max(1,ClientSize.Width-16),28),format);
             radar.DrawBackdrop(backdropCanvas,RadarBounds,settings.Appearance);backgroundDirty=false;BackgroundBuildCount++;
         }
@@ -114,7 +114,7 @@ public sealed class OverlayForm:Form {
         frameCanvas.Flush(System.Drawing.Drawing2D.FlushIntention.Sync);
     }
     public void Animate(PlayerPose pose) {
-        if(campaign&&currentSnapshot!=null){
+        if(trackingActive&&currentSnapshot!=null){
             var player=pose!=null?pose.player:currentSnapshot.player;var yaw=pose!=null?pose.yaw:currentSnapshot.yaw;
             if(player!=null&&(animatedPlayer==null||player.x!=animatedPlayer.x||player.y!=animatedPlayer.y||player.z!=animatedPlayer.z||yaw!=animatedYaw)){
                 targets.UpdatePose(player,yaw);animatedPlayer=player;animatedYaw=yaw;radar.SetHeading(yaw.HasValue);dirty=true;
@@ -139,17 +139,17 @@ public sealed class OverlayForm:Form {
     public void UpdateState(string heading,string connection,string summary,GameSnapshot snapshot,bool active) {
         if(Object.ReferenceEquals(currentSnapshot,snapshot)&&currentActive==active)return;
         currentSnapshot=snapshot;currentActive=active;animatedPlayer=null;animatedYaw=null;
-        bool oldCampaign=campaign;string oldCount=enemyCount;dirty=true;
-        campaign=active&&snapshot!=null&&snapshot.mode=="campaign";
+        bool oldTrackingActive=trackingActive;string oldCount=enemyCount;dirty=true;
+        trackingActive=active&&snapshot!=null&&snapshot.RadarActive;
         string count="待核实";TrackingText=null;
-        if(campaign) {
+        if(trackingActive) {
             targets.Update(snapshot);
             count=(snapshot.enemies??new TargetInfo[0]).Count(t=>t!=null&&t.known).ToString(System.Globalization.CultureInfo.InvariantCulture);
             TrackingText="当前区域已确认存活敌人："+count+"\r\n金色=秘密；红色=敌人。范围内敌人显示实心标记；范围外敌人使用圆圈外的全向红色实心折角箭头，带深色描边，跟随实际方位，约 12 度内的方向合并，不表示数量或高低。秘密持续显示，范围外为空心。\r\n上三角=较高处，下三角=较低处，圆形=同高附近。\r\n高低以相对垂直差约 "+settings.HeightTolerance.ToString("0.0",System.Globalization.CultureInfo.InvariantCulture)+" 米为阈值，不代表已识别真实楼层。\r\n未确认的秘密状态以较暗标记区分；雷达不判断通路。\r\n未加载区域及未激活波次仍待核实。";
         }
         enemyCount="当前区域敌人："+count;
-        if(oldCount!=enemyCount||oldCampaign!=campaign)backgroundDirty=true;
-        radar.UpdateTargets(campaign?targets.Secrets:null,campaign?targets.Enemies:null,radarRange,campaign,
+        if(oldCount!=enemyCount||oldTrackingActive!=trackingActive)backgroundDirty=true;
+        radar.UpdateTargets(trackingActive?targets.Secrets:null,trackingActive?targets.Enemies:null,radarRange,trackingActive,
             snapshot!=null&&snapshot.player!=null&&snapshot.yaw.HasValue);
     }
 }
@@ -169,7 +169,7 @@ public sealed class MainForm:Form {
     [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hwnd,out uint processId);
     public MainForm(string discovered,bool saveSettings=true) {
-        Text="爆弹枪 · 完美通关助手 0.2.2.7"; ClientSize=new Size(820,620); MinimumSize=new Size(760,600);
+        Text="爆弹枪 · 完美通关助手 0.2.3.0"; ClientSize=new Size(820,620); MinimumSize=new Size(760,600);
         StartPosition=FormStartPosition.CenterScreen; Font=new Font("Microsoft YaHei UI",10);
         BackColor=Color.FromArgb(22,26,31); ForeColor=Color.FromArgb(225,233,237);
         settings.GamePath=File.Exists(AppPaths.GameExe(settings.GamePath??""))?settings.GamePath:discovered;
@@ -254,18 +254,19 @@ public sealed class MainForm:Form {
         else if(s.mode=="loading") header="正在加载关卡";
         else if(s.mode=="dead") header="角色已死亡 · 等待重试";
         else if(s.mode=="unsupported") header="当前模式未适配 · "+s.level;
+        else if(s.mode=="horde") header="插件数据桥接就绪 · 围攻模式 · "+s.level;
         else header="插件数据桥接就绪 · "+s.level+(s.verified?"":" · 口径待核实");
         status.Text=header;
-        bool active=s!=null&&store.Fresh(clock.ElapsedMilliseconds)&&(s.mode=="campaign"||s.mode=="results");
+        bool active=s!=null&&store.Fresh(clock.ElapsedMilliseconds)&&(s.RadarActive||s.mode=="results");
         if(active) {
             progress.Text=s.Perfect?"最终结算：完美通关\r\n击杀率 100% · 秘密全收集":DisplayText.Progress(s);
             if(s.mode=="results")details.Text="本关已结束。仅使用本次结算数据判定。\r\n\r\n"+String.Join(" · ",s.warnings??new string[0]);
-        } else {progress.Text="击杀率  待核实\r\n秘密    待核实 / 待核实";details.Text=header;}
+        } else {progress.Text="击杀率  待核实\r\n秘密    待核实 / 待核实";details.Text=header+(s==null?"":"\r\n"+String.Join(" · ",s.warnings??new string[0]));}
         IntPtr gameWindow=IntPtr.Zero;if(gameProcess!=null)try{gameWindow=gameProcess.MainWindowHandle;}catch(InvalidOperationException){}
         if(tick%3==0)overlay.UpdateAnchor(gameWindow);
         overlay.UpdateState(s!=null?s.level:"未连接",header,progress.Text,s,active);
         overlay.Animate(active?store.Poses.Sample(clock.ElapsedMilliseconds,s):null);
-        if(active&&s.mode=="campaign")details.Text=overlay.TrackingText+"\r\n\r\n"+String.Join(" · ",s.warnings??new string[0]);
+        if(active&&s.RadarActive)details.Text=overlay.TrackingText+"\r\n\r\n"+String.Join(" · ",s.warnings??new string[0]);
         uint foreground;GetWindowThreadProcessId(GetForegroundWindow(),out foreground);
         bool foregroundAllowed=foreground==ownerPid||(gameProcess!=null&&foreground==gameProcess.Id);
         bool shouldShow=settings.OverlayVisible&&foregroundAllowed&&(gameProcess!=null||editOverlay);

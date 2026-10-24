@@ -13,10 +13,11 @@ public sealed class TargetInfo { public string id; public string label; public P
 public sealed class FinalResult { public bool confirmed; public string source; public double? killPercent; public int? secretsFound; public int? secretsTotal; public string world; public string level; public int? generation; }
 public sealed class GameSnapshot {
     public int v; public string session; public long seq; public int generation; public string build; public string pluginVersion;
-    public string mode; public string world; public string level; public bool verified; public string error; public string revision; public double sampleMs;
+    public string mode; public string world; public string level; public string gameMode; public bool verified; public string error; public string revision; public double sampleMs;
     public int? secretsFound; public int? secretsTotal; public int? killed; public int? spawned; public double? killPercent;
     public Point3 player; public double? yaw; public TargetInfo[] secrets; public TargetInfo[] enemies;
     public string[] warnings; public FinalResult finalResult;
+    public bool RadarActive { get { return mode=="campaign" || mode=="horde"; } }
     public bool Perfect { get { return mode=="results" && verified && finalResult!=null && finalResult.confirmed &&
         finalResult.source=="game_settlement" && !String.IsNullOrEmpty(world) && finalResult.world==world && finalResult.level==level && finalResult.generation==generation && finalResult.killPercent==100 && finalResult.secretsFound.HasValue &&
         finalResult.secretsTotal.HasValue && finalResult.secretsTotal>=0 && finalResult.secretsFound==finalResult.secretsTotal; } }
@@ -27,13 +28,14 @@ public sealed class SnapshotStore {
     public long ReceivedAt { get; private set; }
     public int Rejected { get; private set; }
     public bool RevisionMismatch { get; private set; }
-    static readonly HashSet<string> Modes=new HashSet<string>(new[]{"initializing","main_menu","loading","dead","campaign","unsupported","results","error"});
+    static readonly HashSet<string> Modes=new HashSet<string>(new[]{"initializing","main_menu","loading","dead","campaign","horde","unsupported","results","error"});
     public bool Accept(string json,long now) {
         try {
             var s=new JavaScriptSerializer {MaxJsonLength=1048576}.Deserialize<GameSnapshot>(json);
             if(s!=null && s.revision!=AppPaths.Revision) {RevisionMismatch=true;return Reject();}
             if(s==null || s.v!=1 || s.build!="14893097" || s.pluginVersion!="0.1.0" || String.IsNullOrEmpty(s.session) || s.session.Length>128 || s.seq<1 || s.generation<0 || !Modes.Contains(s.mode)) return Reject();
             if(!Count(s.secretsFound)||!Count(s.secretsTotal)||!Count(s.killed)||!Count(s.spawned)||!ProgressNumber(s.killPercent)) return Reject();
+            if(s.mode=="horde" && (s.finalResult!=null || s.verified)) return Reject();
             if(Current!=null && (s.session!=Current.session || s.seq<=Current.seq || s.generation<Current.generation)) return Reject();
             if(!ValidPoint(s.player) || (s.yaw.HasValue && (Double.IsNaN(s.yaw.Value)||Double.IsInfinity(s.yaw.Value)))) return Reject();
             foreach(var t in (s.secrets??new TargetInfo[0]).Concat(s.enemies??new TargetInfo[0])) if(t==null || !ValidPoint(t.position)) return Reject();
@@ -94,7 +96,11 @@ public sealed class LogTail {
 }
 public static class DisplayText {
     public static string Count(int? n) { return n.HasValue?n.Value.ToString(CultureInfo.InvariantCulture):"待核实"; }
+    static string HordeProgress(GameSnapshot s) {
+        return "围攻模式 · 已确认存活敌人 "+(s.enemies??new TargetInfo[0]).Count(t=>t!=null&&t.known)+"\r\n仅追踪当前已加载目标，未刷出波次不计入；不判定剧情完美通关。";
+    }
     public static string CompactProgress(GameSnapshot s) {
+        if(s.mode=="horde")return HordeProgress(s).Replace("\r\n"," · ");
         if(s.mode=="results"&&s.finalResult!=null&&s.finalResult.confirmed) {
             string result=s.Perfect?"最终结算：完美通关":"最终结算击杀率 "+(s.finalResult.killPercent.HasValue?s.finalResult.killPercent.Value.ToString("0.##",CultureInfo.InvariantCulture)+"%":"待核实");
             return result+" · 秘密 "+Count(s.finalResult.secretsFound)+" / "+Count(s.finalResult.secretsTotal)+(s.verified?"":" · 判定待核实");
@@ -103,6 +109,7 @@ public static class DisplayText {
             (s.killPercent.HasValue?s.killPercent.Value.ToString("0.##",CultureInfo.InvariantCulture)+"%":"待核实")+" · 以最终结算为准";
     }
     public static string Progress(GameSnapshot s) {
+        if(s.mode=="horde")return HordeProgress(s);
         string percent=s.killPercent.HasValue?s.killPercent.Value.ToString("0.##",CultureInfo.InvariantCulture)+"%":"待核实";
         string result="当前击杀进度  "+percent+"（参考）  已击杀 "+Count(s.killed)+"\r\n秘密    "+Count(s.secretsFound)+" / "+Count(s.secretsTotal);
         if(s.mode=="results" && s.finalResult!=null && s.finalResult.confirmed)

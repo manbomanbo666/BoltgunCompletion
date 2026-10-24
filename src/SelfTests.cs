@@ -267,8 +267,9 @@ public static class SelfTests {
             secrets=new[]{Target("one",3200,1200,1500),Target("two",9000,7000,-1400,false),Target("three",-12000,-3000,0),Target("four",24000,25000,500)},
             enemies=new[]{Target("e1",2000,-4000,-600),Target("e2",10000,800,2000),Target("e3",-7000,-3000,1000),Target("e4",50000,0,0),Target("e5",2000,-4100,0)},
             warnings=new[]{"未激活波次及未加载区域待核实","击杀计数与生成计数不一致，参考百分比待核实"}};
-        foreach(string mode in new[]{"campaign","compact","interrupted","results","unknown-heading","missing-position","critical-warning","background-hidden","markers-only","half-components","pinned"}) {
-            s.mode=mode=="results"?"results":"campaign";s.yaw=mode=="unknown-heading"?(double?)null:25;
+        foreach(string mode in new[]{"campaign","horde","compact","interrupted","results","unknown-heading","missing-position","critical-warning","background-hidden","markers-only","half-components","pinned"}) {
+            s.mode=mode=="results"?"results":mode=="horde"?"horde":"campaign";s.yaw=mode=="unknown-heading"?(double?)null:25;
+            s.level=mode=="horde"?"Horde_1":"C1M8";
             s.player=mode=="missing-position"?null:new Point3();
             s.warnings=mode=="critical-warning"?new[]{"关卡秘密总数与目录不一致，判定已停止"}:new[]{"未激活波次及未加载区域待核实","击杀计数与生成计数不一致，参考百分比待核实"};
             s.finalResult=mode=="results"?new FinalResult {confirmed=true,killPercent=98,secretsFound=2,secretsTotal=6}:null;
@@ -340,7 +341,7 @@ public static class SelfTests {
         }
     }
     public static int Run() {
-        RadarTests();LayoutTests();PoseTests();CacheTests();
+        RadarTests();LayoutTests();PoseTests();CacheTests();HordeTests();
         var store=new SnapshotStore();
         Check(store.Accept(Row(1,"campaign",1),1000),"valid state accepted");
         Check(store.Fresh(3000)&&!store.Fresh(3001),"stale after two seconds");
@@ -416,6 +417,46 @@ public static class SelfTests {
         pose.generation=2;pose.poseSeq=5;store.Poses.Accept(serializer.Serialize(pose),store.Current,3600);
         state.seq=3;state.mode="results";store.Accept(serializer.Serialize(state),3700);
         Check(store.Poses.Sample(3700,store.Current)==null,"results clear the lightweight pose stream");
+    }
+    static void HordeTests() {
+        var serializer=new JavaScriptSerializer();var store=new SnapshotStore();
+        var state=new GameSnapshot {v=1,build="14893097",pluginVersion="0.1.0",revision=AppPaths.Revision,
+            session="horde",seq=1,generation=1,world="World /Game/Maps/_DLC/Horde/Horde_1.Horde_1",level="Horde_1",mode="horde",player=new Point3(),yaw=0,
+            enemies=new[]{Target("wave1",1000,0,0),Target("distant",50000,0,0)},secrets=new TargetInfo[0]};
+        Check(store.Accept(serializer.Serialize(state),1000)&&store.Current.RadarActive&&!store.Current.Perfect,"horde state supports radar without campaign completion");
+        Check(!DisplayText.Progress(state).Contains("秘密")&&!DisplayText.Progress(state).Contains("%")&&DisplayText.Progress(state).Contains("围攻模式"),"horde progress omits unknown campaign counters");
+        var pose=new PlayerPose {v=1,build="14893097",pluginVersion="0.1.0",revision=AppPaths.Revision,
+            session=state.session,poseSeq=1,generation=1,world=state.world,level=state.level,player=new Point3(),yaw=90};
+        Check(store.Poses.Accept(serializer.Serialize(pose),store.Current,1000)&&store.Poses.Sample(1000,store.Current)!=null,"horde lightweight pose is accepted");
+        using(var form=new OverlayForm(new Settings {Opacity=100,OverlayX=-32000,OverlayY=-32000})) {
+            form.UpdateState(state.level,"ready","",store.Current,true);
+            Check(form.EnemyCountText=="当前区域敌人：2"&&form.Radar.VisibleTargetCount>0,"horde overlay plots targets and counts confirmed loaded enemies");
+            form.Animate(store.Poses.Sample(1000,store.Current));
+            state.seq++;state.enemies=new[]{Target("wave2",0,1000,0)};
+            Check(store.Accept(serializer.Serialize(state),1500),"next horde wave accepted without reconnect");
+            form.UpdateState(state.level,"ready","",store.Current,true);
+            Check(form.EnemyCountText=="当前区域敌人：1"&&form.Radar.VisibleTargetCount>0,"wave transition replaces old enemy targets");
+            state.seq++;state.enemies=new TargetInfo[0];store.Accept(serializer.Serialize(state),2000);
+            form.UpdateState(state.level,"ready","",store.Current,true);
+            Check(form.EnemyCountText=="当前区域敌人：0"&&form.Radar.VisibleTargetCount==0&&!store.Current.Perfect,"empty wave does not declare perfect completion");
+            state.seq++;state.enemies=new[]{Target("wave3",1000,0,0)};store.Accept(serializer.Serialize(state),2500);
+            form.UpdateState(state.level,"stale","",store.Current,store.Fresh(4501));
+            Check(form.Radar.VisibleTargetCount==0&&form.EnemyCountText.Contains("待核实"),"stale horde data clears marks and count");
+            state.seq++;state.mode="dead";store.Accept(serializer.Serialize(state),4600);
+            form.UpdateState(state.level,"dead","",store.Current,false);
+            Check(form.Radar.VisibleTargetCount==0&&store.Poses.Sample(4600,store.Current)==null,"horde death clears radar and pose stream");
+            state.seq++;state.generation++;state.mode="horde";state.enemies=new[]{Target("retry",0,1000,0)};store.Accept(serializer.Serialize(state),4700);
+            Check(!store.Poses.Accept(serializer.Serialize(pose),store.Current,4700),"previous horde attempt cannot supply pose");
+            form.UpdateState(state.level,"ready","",store.Current,true);
+            Check(form.Radar.VisibleTargetCount>0&&form.EnemyCountText=="当前区域敌人：1","horde retry resumes with new generation");
+            state.seq++;state.mode="unsupported";store.Accept(serializer.Serialize(state),4800);
+            form.UpdateState(state.level,"unsupported","",store.Current,false);
+            Check(form.Radar.VisibleTargetCount==0,"unsupported mode never retains horde marks");
+        }
+        state.seq++;state.mode="horde";state.verified=true;
+        Check(!store.Accept(serializer.Serialize(state),4900),"horde cannot claim verified campaign statistics");
+        state.verified=false;state.finalResult=new FinalResult();
+        Check(!store.Accept(serializer.Serialize(state),4900),"horde cannot carry campaign settlement data");
     }
     static void CacheTests() {
         var state=new GameSnapshot {session="cache",world="world",level="C1M8",mode="campaign",player=new Point3(),yaw=0,

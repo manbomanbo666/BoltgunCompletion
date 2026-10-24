@@ -36,6 +36,12 @@ for _,message in ipairs(messages)do
  if message:find('[BGC_POSE]',1,true)then poseCount=poseCount+1 end
 end
 assert(stateCount==3 and poseCount==6)
+Adapter.sample=function()samples=samples+1;return {mode='horde',world='horde',level='Horde_1',generation=0,player={x=1,y=2,z=3},yaw=10}end
+Adapter.pose=function()poses=poses+1;return {world='horde',level='Horde_1',generation=0,player={x=1,y=2,z=3},yaw=10}end
+local before=#messages
+for i=1,5 do loops[1].f();table.remove(queue,1)()end
+assert(samples==3 and poses==8 and #messages==before+6)
+assert(messages[#messages]:find('[BGC_POSE]',1,true), 'Full horde samples also send a pose')
 ''');print('PASS: 10 Hz lightweight pose, 2 Hz full state, one pending job and no SDK generation')
 l=runtime();l.execute('''
 Catalog={C1M4={secretsTotal=1,secrets={{name='secret_one',guid='guid',position={x=10,y=20,z=30}}}}}
@@ -177,6 +183,72 @@ assert(s.mode=='results' and s.verified and s.finalResult.confirmed)
 assert(s.finalResult.killPercent==98 and s.finalResult.secretsFound==6 and s.finalResult.secretsTotal==6)
 beforeMap();assert(Adapter.final_result==nil)
 ''');print('PASS: real C1M2 170/173 kills, raw 98.26589966, displayed 98%, secrets 6/6')
+l.execute('''
+-- An arena is admitted by exact world AND reflected game-mode class, never
+-- by a Horde prefix, a streaming sublevel name or a campaign fallback.
+local fullWorld='World /Game/Maps/_DLC/Horde/Horde_1.Horde_1'
+world=object('World','/Game/Maps/_DLC/Horde/Horde_1.Horde_1')
+gameMode=object('HordeMode','mode')
+gameMode:GetClass().GetFullName=function()return Profile.horde.mode_class end
+statics=object('HordeStatics','statics',{}, {
+ GetPlayerPawn={params={'WorldContextObject','PlayerIndex','ReturnValue'},fn=function()return player end},
+ GetGameMode={params={'WorldContextObject','ReturnValue'},fn=function()return gameMode end}})
+Adapter.gameplay_statics=statics
+-- Horde must never consult these campaign counters or chapter getters.
+meta.GetEnemiesKilled=function()error('Campaign statistics used in horde')end
+meta.GetEnemiesSpawned=function()error('Campaign statistics used in horde')end
+instance.GetChapterID=function()error('Campaign chapter used in horde')end
+secret.alive=true;secret.bSecretFound=false
+secret.K2_GetActorLocation=function()return {X=10,Y=20,Z=30}end
+enemyDead=false;enemyRoot.alive=true;enemy.RootComponent=enemyRoot
+enemyPosition={X=400,Y=100,Z=-500}
+local scans=calls.findAll
+local s=Adapter.sample()
+assert(s.mode=='horde' and s.world==fullWorld and s.gameMode==Profile.horde.mode_class)
+assert(#s.enemies==1 and #s.secrets==1 and s.secrets[1].position.x==10)
+assert(not s.verified and not s.finalResult and not s.killed and not s.spawned and not s.killPercent)
+assert(s.secretsFound==nil and s.secretsTotal==nil and calls.findAll==scans+2)
+for i=1,20 do assert(Adapter.pose());assert(Adapter.sample().mode=='horde')end
+assert(calls.findAll==scans+2, 'No periodic arena scans')
+local waveEnemyDead=false
+local waveEnemy=object('WaveEnemy','wave_enemy',{RootComponent=enemyRoot},{
+ IsDead={fn=function()return waveEnemyDead end},
+ K2_GetActorLocation={fn=function()return {X=1000,Y=2000,Z=300}end}})
+notify['/Script/Boltgun.'..Profile.enemy_class](waveEnemy)
+s=Adapter.sample();assert(#s.enemies==2 and calls.findAll==scans+2)
+enemyDead=true;secret.bSecretFound=true;s=Adapter.sample();assert(#s.enemies==1 and #s.secrets==0)
+waveEnemyDead=true;s=Adapter.sample();assert(#s.enemies==0 and not s.killPercent and s.mode=='horde')
+hooks[Profile.hooks.end_level].pre();s=Adapter.sample()
+assert(s.mode=='horde' and not Adapter.ended and not s.finalResult, 'Campaign EndLevel is ignored in horde')
+playerDead=true;s=Adapter.sample();assert(s.mode=='dead' and #s.enemies==0 and Adapter.pose()==nil)
+playerDead=false;hooks[Profile.hooks.restart].pre();assert(Adapter.pose()==nil)
+enemyDead=false;secret.bSecretFound=false;s=Adapter.sample()
+assert(s.mode=='horde' and #s.enemies==1 and #s.secrets==1 and calls.findAll==scans+4)
+-- Same-world retries can construct the next wave before the reset hook.
+waveEnemyDead=false;notify['/Script/Boltgun.'..Profile.enemy_class](waveEnemy)
+hooks[Profile.hooks.restored].post();assert(Adapter.pose()==nil)
+s=Adapter.sample();assert(s.mode=='horde' and #s.enemies==2)
+gameMode:GetClass().GetFullName=function()return 'BlueprintGeneratedClass /Game/TestMode.TestMode_C' end
+s=Adapter.sample();assert(s.mode=='unsupported' and #s.enemies==0 and Adapter.pose()==nil)
+gameMode:GetClass().GetFullName=function()return Profile.horde.mode_class end
+world=object('World','/Game/Maps/_DLC/Horde/Horde_2.Horde_2')
+s=Adapter.sample();assert(s.mode=='unsupported' and #s.enemies==0 and Adapter.pose()==nil)
+world=object('World','/Game/Maps/_DLC/Horde/Horde_1_SubLevels/Horde_1_Walkable.Horde_1_Walkable')
+s=Adapter.sample();assert(s.mode=='unsupported')
+world=object('World','/Game/Maps/_DLC/Horde/Horde_1.Horde_1')
+s=Adapter.sample();assert(s.mode=='horde' and #s.enemies==1)
+-- Returning to a supported campaign restores its original statistics and
+-- metadata; the arena's actor registry and final-state exclusions do not leak.
+world=object('World','C1M4.C1M4')
+meta.GetEnemiesKilled=function()return 0 end
+meta.GetEnemiesSpawned=function()return 7 end
+meta.GetTotalLevelSecrets=function()return 1 end
+meta.SecretesFoundCount=0
+instance.GetChapterID=function()return 0 end
+instance.GetLevelID=function()return 3 end
+s=Adapter.sample()
+assert(s.mode=='campaign' and s.killed==0 and s.spawned==7 and s.secretsTotal==1 and #s.secrets==1 and Adapter.pose())
+''');print('PASS: exact horde admission, pose, secret state, wave spawn/death, empty arena, retry, transition and campaign-stat isolation')
 c=json.loads((ROOT/'src/data/levels.json').read_text(encoding='utf-8'))
 assert len(c)==29 and sum(v['dlc'] for v in c.values())==5
 assert sum(v['secretsTotal'] for v in c.values())==185
