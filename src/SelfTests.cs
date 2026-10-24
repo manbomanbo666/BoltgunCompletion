@@ -37,6 +37,26 @@ public static class SelfTests {
         Check(!s.Perfect,"missing kill percentage fails perfection");s.finalResult.killPercent=100;s.verified=false;
         Check(!s.Perfect,"unverified semantics cannot confirm perfection");
         s.verified=true;s.finalResult.generation=2;Check(!s.Perfect,"previous run final result cannot mark current run perfect");
+        var divergent=new GameSnapshot {v=1,session="c1m8-regression",seq=1,generation=8,build="14893097",pluginVersion="0.1.0",revision=AppPaths.Revision,
+            mode="campaign",world="C1M8",level="C1M8",killed=119,spawned=117,killPercent=101,secretsFound=4,secretsTotal=6,
+            player=new Point3 {x=100,y=200,z=300},secrets=new[]{new TargetInfo {id="secret",known=true,position=new Point3 {x=500}}}};
+        var serializer=new JavaScriptSerializer();var live=new SnapshotStore();
+        Check(live.Accept(serializer.Serialize(divergent),1000),"real C1M8 119/117 counters do not drop the snapshot");
+        Check(live.Current.killPercent==null&&live.Current.killed==119&&live.Current.spawned==117&&live.Current.secretsFound==4&&live.Current.secrets.Length==1&&live.Current.player.y==200,
+            "invalid estimate is unknown while counters, secrets and position survive");
+        Check(live.Current.warnings.Length==1&&!live.Current.Perfect&&DisplayText.Progress(live.Current).Contains("待核实"),"out-of-range estimate is warned, never clamped to perfection");
+        divergent.seq=2;Check(live.Accept(serializer.Serialize(divergent),2500)&&live.Fresh(4000),"continued above-100 telemetry stays fresh");
+        divergent.seq=3;divergent.killPercent=100;
+        Check(live.Accept(serializer.Serialize(divergent),3000)&&live.Current.killPercent==100&&live.Current.warnings==null,"normal estimate recovers without sticky warning");
+        divergent.seq=4;divergent.killPercent=-1;
+        Check(!live.Accept(serializer.Serialize(divergent),3500)&&live.ReceivedAt==3000,"negative estimate remains invalid and does not renew freshness");
+        divergent.killPercent=101;divergent.mode="results";divergent.verified=true;
+        divergent.finalResult=new FinalResult {confirmed=true,source="game_settlement",killPercent=101,secretsFound=6,secretsTotal=6,world="C1M8",level="C1M8",generation=8};
+        Check(!live.Accept(serializer.Serialize(divergent),3500),"above-100 final settlement remains rejected");
+        divergent.finalResult.killPercent=98;
+        Check(live.Accept(serializer.Serialize(divergent),3500)&&!live.Current.Perfect,"valid non-perfect settlement is independent of invalid live estimate");
+        divergent.seq=5;divergent.finalResult.killPercent=100;
+        Check(live.Accept(serializer.Serialize(divergent),4000)&&live.Current.Perfect,"confirmed same-run perfect settlement remains supported");
         string dir=Path.Combine(AppPaths.Root,"data","test-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(dir);
         string path=Path.Combine(dir,"中文日志.log");
         try {

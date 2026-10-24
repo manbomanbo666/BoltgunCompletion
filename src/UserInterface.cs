@@ -101,7 +101,7 @@ public sealed class MainForm:Form {
     [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hwnd,out uint processId);
     public MainForm(string discovered) {
-        Text="爆弹枪 · 完美通关助手 0.1"; ClientSize=new Size(820,620); MinimumSize=new Size(760,600);
+        Text="爆弹枪 · 完美通关助手 0.1.0.1"; ClientSize=new Size(820,620); MinimumSize=new Size(760,600);
         StartPosition=FormStartPosition.CenterScreen; Font=new Font("Microsoft YaHei UI",10);
         BackColor=Color.FromArgb(22,26,31); ForeColor=Color.FromArgb(225,233,237);
         settings.GamePath=File.Exists(AppPaths.GameExe(settings.GamePath??""))?settings.GamePath:discovered;

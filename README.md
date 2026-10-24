@@ -8,17 +8,19 @@
 
 打开 **[最新版本下载页](https://github.com/manbomanbo666/BoltgunCompletion/releases/latest)**，展开页面底部的 **Assets**，下载：
 
-**[BoltgunCompletion-0.1.0-win-x64.zip](https://github.com/manbomanbo666/BoltgunCompletion/releases/download/v0.1.0/BoltgunCompletion-0.1.0-win-x64.zip)**
+**[BoltgunCompletion-0.1.0.1-win-x64.zip](https://github.com/manbomanbo666/BoltgunCompletion/releases/download/v0.1.0.1/BoltgunCompletion-0.1.0.1-win-x64.zip)**
 
 | 下载项 | 用途 |
 | --- | --- |
-| `BoltgunCompletion-0.1.0-win-x64.zip` | 玩家使用，包含启动程序与运行时 |
+| `BoltgunCompletion-0.1.0.1-win-x64.zip` | 玩家使用，包含启动程序与运行时 |
 | `SHA256SUMS.txt` | 可选，用于核对压缩包完整性 |
-| `BoltgunCompletion-0.1.0-source.zip`、GitHub 自动生成的 `Source code` | 开发者使用，不能解压后直接运行 |
+| `BoltgunCompletion-0.1.0.1-source.zip`、GitHub 自动生成的 `Source code` | 开发者使用，不能解压后直接运行 |
 
 请不要把仓库绿色 **Code → Download ZIP** 当作运行包下载。
 
 适用环境：Windows 64 位、.NET Framework 4.x，以及已安装的《爆弹枪》一代。当前仅适配 **Steam 构建 14893097（UE 4.27.2）**；程序会校验游戏文件，其他构建会提示未适配。内置本体 24 关与剧情 DLC 5 关的位置目录；DLC 需要玩家自行拥有，尚未逐关实机验证。
+
+当前版本 **v0.1.0.1** 修复了参考击杀进度超过 100% 时误报“数据中断”的问题。此时仅将参考百分比标为待核实，秘密和位置仍会持续更新；最终结算判定保持严格校验。
 
 ## 2. 第一次使用
 
@@ -102,8 +104,8 @@ python tools/package.py
 输出位于 `dist/`：
 
 - `BoltgunCompletion/`：可直接运行的插件目录。
-- `BoltgunCompletion-0.1.0-win-x64.zip`：供用户下载的运行包。
-- `BoltgunCompletion-0.1.0-source.zip`：干净源码包。
+- `BoltgunCompletion-0.1.0.1-win-x64.zip`：供用户下载的运行包。
+- `BoltgunCompletion-0.1.0.1-source.zip`：干净源码包。
 - `SHA256SUMS.txt`：两个压缩包的 SHA256。
 
 已有自动检查保留在源码中，可按需运行：

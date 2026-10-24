@@ -32,17 +32,25 @@ public sealed class SnapshotStore {
             var s=new JavaScriptSerializer {MaxJsonLength=1048576}.Deserialize<GameSnapshot>(json);
             if(s!=null && s.revision!=AppPaths.Revision) {RevisionMismatch=true;return Reject();}
             if(s==null || s.v!=1 || s.build!="14893097" || s.pluginVersion!="0.1.0" || String.IsNullOrEmpty(s.session) || s.session.Length>128 || s.seq<1 || s.generation<0 || !Modes.Contains(s.mode)) return Reject();
-            if(!Count(s.secretsFound)||!Count(s.secretsTotal)||!Count(s.killed)||!Count(s.spawned)||!Percent(s.killPercent)) return Reject();
+            if(!Count(s.secretsFound)||!Count(s.secretsTotal)||!Count(s.killed)||!Count(s.spawned)||!ProgressNumber(s.killPercent)) return Reject();
             if(Current!=null && (s.session!=Current.session || s.seq<=Current.seq || s.generation<Current.generation)) return Reject();
             if(!ValidPoint(s.player) || (s.yaw.HasValue && (Double.IsNaN(s.yaw.Value)||Double.IsInfinity(s.yaw.Value)))) return Reject();
             foreach(var t in (s.secrets??new TargetInfo[0]).Concat(s.enemies??new TargetInfo[0])) if(t==null || !ValidPoint(t.position)) return Reject();
             if(s.finalResult!=null && (!Count(s.finalResult.secretsFound)||!Count(s.finalResult.secretsTotal)||!Percent(s.finalResult.killPercent))) return Reject();
             if(s.finalResult!=null && s.finalResult.confirmed && (s.finalResult.world!=s.world || s.finalResult.level!=s.level || s.finalResult.generation!=s.generation)) return Reject();
+            // Live killed/spawned counters can diverge (observed in C1M8).
+            // Discard only the estimate, not otherwise valid target telemetry.
+            // Final settlement percentages retain the strict 0..100 check above.
+            if(s.killPercent>100) {
+                s.killPercent=null;
+                s.warnings=(s.warnings??new string[0]).Concat(new[]{"击杀计数与生成计数不一致，参考百分比待核实"}).ToArray();
+            }
             Current=s; ReceivedAt=now; RevisionMismatch=false; return true;
         } catch { return Reject(); }
     }
     bool Reject() { Rejected++; return false; }
     static bool Count(int? v) { return !v.HasValue || (v>=0 && v<10000000); }
+    static bool ProgressNumber(double? v) { return !v.HasValue || (!Double.IsNaN(v.Value)&&!Double.IsInfinity(v.Value)&&v>=0); }
     static bool Percent(double? v) { return !v.HasValue || (!Double.IsNaN(v.Value)&&!Double.IsInfinity(v.Value)&&v>=0&&v<=100); }
     static bool ValidPoint(Point3 p) { return p==null || new[]{p.x,p.y,p.z}.All(n=>!Double.IsNaN(n)&&!Double.IsInfinity(n)&&Math.Abs(n)<1e12); }
     public bool Fresh(long now) { return Current!=null && now>=ReceivedAt && now-ReceivedAt<=2000; }

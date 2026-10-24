@@ -6,7 +6,7 @@ import json
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '0.1.0'
+VERSION = '0.1.0.1'
 
 
 def write_archive(output, base, files):
@@ -44,7 +44,7 @@ def main():
     runtime_zip = ROOT / ('dist/BoltgunCompletion-' + VERSION + '-win-x64.zip')
     write_archive(runtime_zip, base, runtime_files)
 
-    source_files = {'.gitignore', 'README.md', 'CHANGELOG.md', 'THIRD_PARTY_NOTICES.md',
+    source_files = {'.gitignore', 'README.md', 'CHANGELOG.md', 'DEVELOPMENT.md', 'THIRD_PARTY_NOTICES.md',
                     'tools/build.py', 'tools/fetch_dependencies.py', 'tools/package.py'}
     for directory in ('src', 'tests', 'licenses'):
         for path in (ROOT / directory).rglob('*'):
