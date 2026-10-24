@@ -11,7 +11,8 @@ public sealed class TargetView {
     public bool HasHeading;
     public string Code;
     // Relative elevation only; exact floor topology is not known.
-    public int HeightBand {get{return HeightMetres>=2?1:HeightMetres<=-2?-1:0;}}
+    public int HeightBand {get{return BandAt(2);}}
+    public int BandAt(double tolerance) {return HeightMetres>=tolerance?1:HeightMetres<=-tolerance?-1:0;}
     public bool InRange(double range) {return HorizontalMetres<=range;}
     public string Direction {
         get {

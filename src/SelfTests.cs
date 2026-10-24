@@ -11,7 +11,10 @@ namespace BoltgunCompletion {
 public static class SelfTests {
     public static int Render(string path) {
         Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
-        using(var form=new MainForm(GameLocator.Find())) {
+        return RenderMain(path);
+    }
+    static int RenderMain(string path) {
+        using(var form=new MainForm(GameLocator.Find(),false)) {
             form.ShowInTaskbar=false;form.StartPosition=FormStartPosition.Manual;form.Location=new Point(-32000,-32000);
             form.Show();Application.DoEvents();
             using(var bitmap=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(bitmap,new Rectangle(Point.Empty,bitmap.Size));bitmap.Save(path);}
@@ -52,7 +55,57 @@ public static class SelfTests {
         Check(DisplayText.CompactProgress(progress).Contains("参考击杀 待核实")&&!DisplayText.CompactProgress(progress).Contains("完美通关"),"compact progress preserves unknown estimate without declaring perfection");
         Check(new TargetView {HeightMetres=1.99}.HeightBand==0&&new TargetView {HeightMetres=2}.HeightBand==1&&new TargetView {HeightMetres=-2}.HeightBand==-1,"relative elevation uses the two-metre boundary");
         Check(new TargetView {HorizontalMetres=100}.InRange(100)&&!new TargetView {HorizontalMetres=100.01}.InRange(100),"range boundary belongs to filled in-range markers");
-        MarkerVisualTest();
+        MarkerVisualTest();AppearanceTests();
+    }
+    static RadarAppearance Invisible() {return new RadarAppearance {Background=0,Rings=0,Axes=0,Secrets=0,Enemies=0,Player=0,Counter=0};}
+    static int VisiblePixels(Bitmap bitmap,Rectangle area) {int count=0;for(int y=area.Top;y<area.Bottom;y++)for(int x=area.Left;x<area.Right;x++)if(bitmap.GetPixel(x,y).A>0)count++;return count;}
+    static void AppearanceTests() {
+        var legacy=Settings.FromJson("{\"Opacity\":88,\"OverlayX\":123}");
+        Check(legacy.Opacity==88&&legacy.OverlayX==123&&legacy.Appearance.Background==100&&legacy.Appearance.Counter==100&&legacy.HeightTolerance==5&&legacy.ShowPlayerArrow&&!legacy.PinCenter,"old settings retain opacity and position with independent-layer defaults");
+        var invalid=Settings.FromJson("{\"Opacity\":-1,\"Appearance\":{\"Background\":-2,\"Secrets\":101,\"Enemies\":0}}");
+        Check(invalid.Opacity==0&&invalid.Appearance.Background==0&&invalid.Appearance.Secrets==100&&invalid.Appearance.Enemies==0&&invalid.Appearance.Rings==100,"component percentages are clamped while absent fields retain defaults");
+        Check(Settings.FromJson("{\"Appearance\":null}").Appearance.Player==100,"null legacy appearance is restored");
+        Check(RadarAppearance.GlobalAlpha(0)==0&&RadarAppearance.GlobalAlpha(100)==255&&RadarAppearance.GlobalAlpha(50)==128,"overall opacity is a separate window-wide multiplier");
+        Check(Settings.FromJson("{\"HeightTolerance\":0}").HeightTolerance==0.5&&Settings.FromJson("{\"HeightTolerance\":100}").HeightTolerance==30,"height tolerance is limited to the adjustable range");
+        Check(new TargetView {HeightMetres=3}.BandAt(5)==0&&new TargetView {HeightMetres=5}.BandAt(5)==1&&new TargetView {HeightMetres=-5}.BandAt(5)==-1,"five-metre tolerance reduces premature upper and lower floor markers");
+        var centered=OverlayAnchor.Center(new Rectangle(100,200,1280,720),new Rectangle(8,36,404,416));
+        Check(centered.X+210==740&&centered.Y+244==560,"pinning aligns radar centre rather than the enclosing window centre");
+        centered=OverlayAnchor.Center(new Rectangle(-1920,0,1920,1080),new Rectangle(8,36,404,416));
+        Check(centered.X+210==-960&&centered.Y+244==540,"centering handles a monitor left of the primary display");
+        var radarBounds=new Rectangle(750,296,420,460);var dialogSize=new Size(486,449);
+        var dialogPoint=OverlayAnchor.SettingsPosition(new Rectangle(0,0,1920,1040),radarBounds,dialogSize);
+        Check(!new Rectangle(dialogPoint,dialogSize).IntersectsWith(radarBounds),"settings window stays beside a centred radar when space permits");
+        var settings=new Settings {Opacity=100,Appearance=Invisible()};
+        var state=new GameSnapshot {session="alpha",world="world",level="C1M8",mode="campaign",player=new Point3(),yaw=0,
+            secrets=new[]{Target("secret",1000,0,0)},enemies=new[]{Target("enemy",0,1000,0)}};
+        using(var form=new OverlayForm(settings)) {
+            form.UpdateState("C1M8","ready","",state,true);
+            using(var image=form.RenderBitmap())Check(VisiblePixels(image,new Rectangle(Point.Empty,image.Size))==0,"all components at zero produce fully transparent pixels");
+            settings.Appearance.Background=50;
+            using(var image=form.RenderBitmap())Check(image.GetPixel(0,0).A==128,"background alpha is genuine partial transparency");
+            settings.Appearance.Background=0;settings.Appearance.Secrets=100;
+            using(var image=form.RenderBitmap())Check(image.GetPixel(210,225).A==255&&image.GetPixel(229,244).A==0&&image.GetPixel(0,0).A==0,"secret remains opaque with invisible background and enemies");
+            settings.Appearance.Secrets=50;
+            using(var image=form.RenderBitmap())Check(image.GetPixel(210,225).A==128,"secret opacity does not depend on background opacity");
+            settings.Appearance.Secrets=0;settings.Appearance.Enemies=100;
+            using(var image=form.RenderBitmap())Check(image.GetPixel(229,244).A==255&&image.GetPixel(210,225).A==0,"enemy opacity is independent of secret opacity");
+            settings.Appearance.Enemies=0;settings.Appearance.Player=100;
+            using(var image=form.RenderBitmap())Check(image.GetPixel(210,244).A==255,"player arrow can be the only visible radar component");
+            settings.ShowPlayerArrow=false;
+            using(var image=form.RenderBitmap())Check(image.GetPixel(210,244).A==0,"centre arrow can be disabled independently");
+            settings.ShowPlayerArrow=true;var freePosition=form.Location;form.SetPinned(true);
+            using(var image=form.RenderBitmap())Check(image.GetPixel(210,244).A==0,"pinning suppresses the centre arrow even when selected");
+            form.SetPinned(false);
+            using(var image=form.RenderBitmap())Check(image.GetPixel(210,244).A==255&&form.Location==freePosition&&settings.ShowPlayerArrow,"unpinning restores the free position and previous arrow preference");
+            settings.Appearance.Player=0;settings.Appearance.Counter=100;
+            using(var image=form.RenderBitmap())Check(VisiblePixels(image,new Rectangle(8,8,404,28))>0&&image.GetPixel(210,244).A==0,"enemy count can be visible independently of player arrow");
+            settings.Appearance.Counter=0;settings.Appearance.Rings=100;
+            using(var image=form.RenderBitmap())Check(VisiblePixels(image,new Rectangle(8,36,404,416))>0&&image.GetPixel(210,244).A==0,"rings can remain visible with axes hidden");
+            settings.Appearance.Rings=0;settings.Appearance.Axes=100;
+            using(var image=form.RenderBitmap())Check(VisiblePixels(image,new Rectangle(8,36,404,416))>0,"crosshair axes are independently visible");
+            var restored=Settings.FromJson(new JavaScriptSerializer().Serialize(settings));
+            Check(restored.Appearance.Axes==100&&restored.Appearance.Rings==0&&restored.Appearance.Background==0,"component settings survive serialization");
+        }
     }
     static void MarkerVisualTest() {
         var markers=new TargetView[6];
@@ -74,14 +127,19 @@ public static class SelfTests {
             secrets=new[]{Target("one",3200,1200,1500),Target("two",9000,7000,-1400,false),Target("three",-12000,-3000,0),Target("four",24000,25000,500)},
             enemies=new[]{Target("e1",2000,-4000,-600),Target("e2",10000,800,2000),Target("e3",-7000,-3000,1000),Target("e4",50000,0,0),Target("e5",2000,-4100,0)},
             warnings=new[]{"未激活波次及未加载区域待核实","击杀计数与生成计数不一致，参考百分比待核实"}};
-        foreach(string mode in new[]{"campaign","compact","interrupted","results","unknown-heading","missing-position","critical-warning"}) {
+        foreach(string mode in new[]{"campaign","compact","interrupted","results","unknown-heading","missing-position","critical-warning","background-hidden","markers-only","half-components","pinned"}) {
             s.mode=mode=="results"?"results":"campaign";s.yaw=mode=="unknown-heading"?(double?)null:25;
             s.player=mode=="missing-position"?null:new Point3();
             s.warnings=mode=="critical-warning"?new[]{"关卡秘密总数与目录不一致，判定已停止"}:new[]{"未激活波次及未加载区域待核实","击杀计数与生成计数不一致，参考百分比待核实"};
             s.finalResult=mode=="results"?new FinalResult {confirmed=true,killPercent=98,secretsFound=2,secretsTotal=6}:null;
-            using(var form=new OverlayForm(new Settings {OverlayX=-32000,OverlayY=-32000})) {
+            var settings=new Settings {OverlayX=-32000,OverlayY=-32000,Opacity=100};
+            if(mode=="background-hidden")settings.Appearance.Background=0;
+            if(mode=="markers-only"){settings.Appearance=Invisible();settings.Appearance.Secrets=100;settings.Appearance.Enemies=100;settings.Appearance.Player=100;}
+            if(mode=="half-components"){settings.Appearance.Background=30;settings.Appearance.Rings=50;settings.Appearance.Axes=20;settings.Appearance.Enemies=25;settings.Appearance.Player=75;}
+            if(mode=="pinned")settings.PinCenter=true;
+            using(var form=new OverlayForm(settings)) {
                 if(mode=="compact")form.Height=420;
-                form.Opacity=1;form.Location=new Point(-32000,-32000);form.Show();
+                form.Location=new Point(-32000,-32000);form.Show();
                 form.UpdateState(s.level,mode=="interrupted"?"数据中断 · 旧数据已停止作为实时提示":"插件数据桥接就绪 · "+s.level,DisplayText.Progress(s),s,mode!="interrupted");
                 Application.DoEvents();
                 CheckLabels(form);
@@ -91,14 +149,32 @@ public static class SelfTests {
                 bool campaign=mode!="interrupted"&&mode!="results";
                 if(form.EnemyCountText!=(campaign?"当前区域敌人：5":"当前区域敌人：待核实"))throw new Exception("Regional enemy count was stale or included unknown enemies");
                 if((!campaign||s.player==null||!s.yaw.HasValue)&&radar.VisibleTargetCount!=0)throw new Exception("Unavailable radar still shows target positions");
-                if(CountLabels(form)!=1)throw new Exception("Radar-only overlay contains unwanted text controls");
-                using(var bitmap=new Bitmap(form.Width,form.Height)){form.DrawToBitmap(bitmap,new Rectangle(Point.Empty,bitmap.Size));bitmap.Save(Path.Combine(directory,"radar-"+mode+".png"));}
+                if(CountLabels(form)!=0)throw new Exception("Layered overlay contains legacy child labels");
+                if(form.PresentationCount==0)throw new Exception("Native layered presentation did not run");
+                var priorBounds=form.Bounds;form.SetEdit(true);form.SetEdit(false);form.ApplyAppearance();
+                if(form.Bounds!=priorBounds||radar.PlotDiameter<(mode=="compact"?340:375))throw new Exception("Editing changed overlay size or position");
+                if(form.PresentationError!=null)throw new Exception("Layered rendering failed after editing: "+form.PresentationError);
+                using(var bitmap=form.RenderBitmap())bitmap.Save(Path.Combine(directory,"radar-"+mode+".png"));
+                if(mode=="background-hidden")using(var bitmap=form.RenderBitmap())SaveCheckerPreview(bitmap,Path.Combine(directory,"radar-background-checker.png"));
                 form.Close();
             }
         }
+        using(var dialog=new AppearanceDialog(new Settings(),()=>{},false)) {
+            dialog.Location=new Point(-32000,-32000);dialog.StartPosition=FormStartPosition.Manual;dialog.Show();Application.DoEvents();CheckLabels(dialog);
+            using(var bitmap=new Bitmap(dialog.Width,dialog.Height)){dialog.DrawToBitmap(bitmap,new Rectangle(Point.Empty,bitmap.Size));bitmap.Save(Path.Combine(directory,"radar-settings.png"));}dialog.Close();
+        }
+        RenderMain(Path.Combine(directory,"assistant-settings-main.png"));
         Console.WriteLine("RADAR_PREVIEWS_RENDERED");return 0;
     }
+    static void SaveCheckerPreview(Bitmap source,string path) {
+        using(var bitmap=new Bitmap(source.Width,source.Height))using(var g=Graphics.FromImage(bitmap)) {
+            using(var light=new SolidBrush(Color.FromArgb(74,78,84)))using(var dark=new SolidBrush(Color.FromArgb(48,52,58)))
+                for(int y=0;y<bitmap.Height;y+=20)for(int x=0;x<bitmap.Width;x+=20)g.FillRectangle((x/20+y/20)%2==0?light:dark,x,y,20,20);
+            g.DrawImageUnscaled(source,0,0);bitmap.Save(path);
+        }
+    }
     static RadarControl FindRadar(Control root) {
+        var overlay=root as OverlayForm;if(overlay!=null)return overlay.Radar;
         var radar=root as RadarControl;if(radar!=null)return radar;
         foreach(Control child in root.Controls){radar=FindRadar(child);if(radar!=null)return radar;}return null;
     }
